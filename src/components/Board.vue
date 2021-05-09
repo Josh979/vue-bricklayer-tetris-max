@@ -6,17 +6,18 @@
       </div>
       <div v-if="spacesInitialized" class="board-wrapper">
         <div class="flex flex-col">
-          <div v-for="(row, rIndex) in config.rows" class="flex" :key="`col${rIndex}`" >
+          <div v-for="(row, rIndex) in config.rows" class="flex" :key="`col${rIndex}`">
             <template v-if="rIndex > 1">
-              <div v-for="(col, cIndex) in config.columns" class="space" :class="spaces[rIndex][cIndex].type" :key="`space${cIndex},${rIndex}`">
-                <span>{{spaces[rIndex][cIndex].occupied ? 'y' : ''}}</span>
+              <div v-for="(col, cIndex) in config.columns" class="space" :class="spaces[rIndex][cIndex].type"
+                   :key="`space${cIndex},${rIndex}`">
+                <span>{{ spaces[rIndex][cIndex].occupied ? 'y' : '' }}</span>
                 <template v-if="isActiveShape(rIndex,cIndex)">
                   <div class="space" :class="activeShape.type"></div>
                 </template>
               </div>
             </template>
+          </div>
         </div>
-      </div>
       </div>
       <div class="mb-4" v-else>
         <h1 class="text-5xl mt-10">Game Over</h1>
@@ -36,7 +37,7 @@
 </template>
 
 <script>
-import {mapGetters} from 'vuex';
+import {mapGetters, mapActions} from 'vuex';
 
 export default {
   name: 'Board',
@@ -60,16 +61,15 @@ export default {
         rotation: 0,
         coordinates: []
       },
-      shapes: {
-        I: [],
-        L: []
-      },
+      shapes: {},
     }
   },
 
   computed:{
     ...mapGetters([
+      "getShape",
       "getNextShape",
+      "getQueue",
     ]),
 
     getScore(){
@@ -82,26 +82,40 @@ export default {
       return this.getScore >= this.highScore;
     },
     colCenter(){
-      return Math.ceil(this.config.columns / 2);
+      return Math.floor(this.config.columns / 2);
     }
   },
 
   methods:{
+    ...mapActions([
+      "processQueue",
+      "loadQueue",
+    ]),
+
     startGame(){
       this.started = true;
+      //this.startMusic();
+      this.loadQueue();
+      this.loadQueue();
+      this.spawnShape();
+
       window.addEventListener('keydown', this.handleKeydown, null);
     },
-    moveLeft(){
-      this.move(-1,0);
+    startMusic(){
+      const music = new Audio(require('@/assets/sounds/t-maxx.mp3'));
+      music.play();
+      music.loop = true;
     },
-    moveRight(){
-      this.move(1,0);
-    },
-    moveUp(){
-      this.move(0,-1);
-    },
-    moveDown(){
-      this.move(0,1);
+    move(direction){
+      const length = this.activeShape.pointers.length;
+      const validation = this.activeShape.pointers.filter((item) => {
+        return item[direction] !== null
+      }).length;
+      if (length === validation){
+        this.activeShape.pointers = this.activeShape.pointers.map((x) => {
+          return x[direction];
+        })
+      }
     },
     rotateClockwise(){},
     rotateCounterClockwise(){},
@@ -109,7 +123,8 @@ export default {
       this.activeShape = this.buildActiveShape();
     },
     buildActiveShape(){
-      const type = this.getNextShape;
+      this.processQueue();
+      const type = this.getShape;
       const pointers = [...this.shapes[type]];
       return {type,pointers}
     },
@@ -119,6 +134,10 @@ export default {
     gameOver() {
       this.updateHighScore();
       this.active = false;
+    },
+    levelUp(){
+      const audio = new Audio(require('@/assets/sounds/levelup.mp3'));
+      audio.play();
     },
     updateHighScore(){
       if (localStorage.getItem('highscore') < this.score){
@@ -138,18 +157,48 @@ export default {
     },
     buildShapes(){
       const I = [
-        this.spaces[this.colCenter][0],
-        this.spaces[this.colCenter][1],
-        this.spaces[this.colCenter][2],
-        this.spaces[this.colCenter][3]
+        this.spaces[0][this.colCenter],
+        this.spaces[1][this.colCenter],
+        this.spaces[2][this.colCenter],
+        this.spaces[3][this.colCenter]
       ];
       const L = [
-        this.spaces[this.colCenter][0],
-        this.spaces[this.colCenter][1],
-        this.spaces[this.colCenter][2],
-        this.spaces[this.colCenter][3]
+        this.spaces[0][this.colCenter],
+        this.spaces[1][this.colCenter],
+        this.spaces[2][this.colCenter],
+        this.spaces[2][this.colCenter+1]
       ];
-      this.shapes = {I,L}
+      const J = [
+        this.spaces[0][this.colCenter],
+        this.spaces[1][this.colCenter],
+        this.spaces[2][this.colCenter],
+        this.spaces[2][this.colCenter-1]
+      ];
+      const T = [
+        this.spaces[0][this.colCenter-1],
+        this.spaces[0][this.colCenter+1],
+        this.spaces[0][this.colCenter],
+        this.spaces[1][this.colCenter]
+      ];
+      const O = [
+        this.spaces[0][this.colCenter],
+        this.spaces[0][this.colCenter+1],
+        this.spaces[1][this.colCenter],
+        this.spaces[1][this.colCenter+1]
+      ];
+      const S = [
+        this.spaces[0][this.colCenter],
+        this.spaces[1][this.colCenter],
+        this.spaces[1][this.colCenter+1],
+        this.spaces[2][this.colCenter+1]
+      ];
+      const Z = [
+        this.spaces[0][this.colCenter+1],
+        this.spaces[1][this.colCenter+1],
+        this.spaces[1][this.colCenter],
+        this.spaces[2][this.colCenter]
+      ];
+      this.shapes = {I,L,J,T,O,S,Z}
     },
     buildSpaces(){
       let spacesArray = [];
@@ -203,17 +252,23 @@ export default {
     },
     handleKeydown(e) {
       switch (e.keyCode) {
+        case 32:
+          this.spawnShape();
+          break;
         case 37:
-          this.moveLeft();
+          this.move('left');
           break;
         case 38:
-          this.moveUp('up'); // for dev only
+          this.move('up'); // dev only
           break;
         case 39:
-          this.moveRight();
+          this.move('right');
           break;
         case 40:
-          this.moveDown();
+          this.move('down');
+          break;
+        case 82:
+          this.loadQueue();
           break;
       }
     }
@@ -221,15 +276,11 @@ export default {
   created() {
     this.buildSpaces();
     this.buildShapes();
-    this.spawnShape();
-    this.activeShape.pointers = this.activeShape.pointers.map((x) => {
-      return x.right;
-    })
   }
 }
 </script>
 
-<style lang="scss">
+<style scoped lang="scss">
 .board-wrapper{
   border: 2px solid blue;
   background: black;
@@ -248,17 +299,29 @@ export default {
       top: 2px solid #ffffff75;
       left: 2px solid #ffffff75;
       bottom: 2px solid #000000;
-      right: 2px solid #000000;
+      right: 2px solid #00000020;
     }
   }
   &.I{
     background-color: blue;
   }
   &.T{
-    background-color: green;
+    background-color: limegreen;
+  }
+  &.J{
+    background-color: red;
+  }
+  &.L{
+    background-color: cyan;
   }
   &.S{
+    background-color: yellow;
+  }
+  &.Z{
     background-color: white;
+  }
+  &.O{
+    background-color: purple;
   }
 }
 .start-button{
