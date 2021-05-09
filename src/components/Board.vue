@@ -12,7 +12,7 @@
                    :key="`space${cIndex},${rIndex}`">
                 <span>{{ spaces[rIndex][cIndex].occupied ? 'y' : '' }}</span>
                 <template v-if="isActiveShape(rIndex,cIndex)">
-                  <div class="space" :class="activeShape.type"></div>
+                  <div class="space" :class="activeShape.type"><span v-if="dev.showPointers">{{activeShape.pointers.indexOf(spaces[rIndex][cIndex])}}</span></div>
                 </template>
               </div>
             </template>
@@ -47,6 +47,9 @@ export default {
       config:{
         rows: 22,
         columns: 10,
+      },
+      dev:{
+        showPointers: false,
       },
       queue: null,
       started: false,
@@ -126,7 +129,293 @@ export default {
       this.processQueue();
       const type = this.getShape;
       const pointers = [...this.shapes[type]];
-      return {type,pointers}
+      const rotation = 0;
+      return {type,pointers, rotation}
+    },
+    rotateShape(){
+      switch (this.activeShape.type) {
+        case 'I':
+          this.rotateI();
+          break;
+        case 'O':
+          /** Free dude! **/
+          break;
+        case 'S':
+          this.rotateS();
+          break;
+        case 'Z':
+          this.rotateZ();
+          break;
+        case 'L':
+          this.rotateL();
+          break;
+        case 'J':
+          this.rotateJ();
+          break;
+        case 'T':
+          this.rotateT();
+          break;
+      }
+    },
+    // have to walk the path since we could likely encounter a null
+    // and only check for occupied at the final destination
+    checkAvailableSpaceExists(node, nodePathArr){
+      let pointer = node;
+      let index = 0;
+      while (pointer !== null){
+        if (pointer[nodePathArr[index]] !== null){
+          pointer = pointer[nodePathArr[index]];
+          if (index === nodePathArr.length - 1){
+            return !pointer['occupied'];
+          } else {
+            ++index;
+          }
+        } else {
+          return false;
+        }
+      }
+      return true;
+    },
+    // This is gonna be tedious...
+    rotateI(){
+      let shapePointers = this.activeShape.pointers;
+      switch (this.activeShape.rotation) {
+        case 0:
+        case 2:
+          if (this.checkAvailableSpaceExists(shapePointers[3],['left']) &&
+              this.checkAvailableSpaceExists(shapePointers[2],['down','right','right']) &&
+              this.checkAvailableSpaceExists(shapePointers[1],['down','down','right']) &&
+              this.checkAvailableSpaceExists(shapePointers[0],['down','down','down'])){
+            shapePointers[3] = shapePointers[3].left;
+            shapePointers[2] = shapePointers[2].down.right.right;
+            shapePointers[1] = shapePointers[1].down.down.right;
+            shapePointers[0] = shapePointers[0].down.down.down
+            ++this.activeShape.rotation;
+          }
+          break;
+        case 1:
+        case 3:
+          if (this.checkAvailableSpaceExists(shapePointers[0],['up','up','up']) &&
+              this.checkAvailableSpaceExists(shapePointers[1],['up','up','left']) &&
+              this.checkAvailableSpaceExists(shapePointers[2],['up','left','left']) &&
+              this.checkAvailableSpaceExists(shapePointers[3],['right'])){
+            shapePointers[0] = shapePointers[0].up.up.up;
+            shapePointers[1] = shapePointers[1].up.up.left;
+            shapePointers[2] = shapePointers[2].up.left.left;
+            shapePointers[3] = shapePointers[3].right;
+            if (this.activeShape.rotation === 3){
+              this.activeShape.rotation = 0;
+            } else {
+              ++this.activeShape.rotation;
+            }
+          }
+          break;
+      }
+    },
+    rotateS(){
+      let shapePointers = this.activeShape.pointers;
+      switch (this.activeShape.rotation) {
+        case 0:
+        case 2:
+          if (this.checkAvailableSpaceExists(shapePointers[2],['right']) &&
+              this.checkAvailableSpaceExists(shapePointers[1],['right']) &&
+              this.checkAvailableSpaceExists(shapePointers[0],['down','down'])){
+            shapePointers[2] = shapePointers[2].right;
+            shapePointers[1] = shapePointers[1].right;
+            shapePointers[0] = shapePointers[0].down.down
+            ++this.activeShape.rotation;
+          }
+          break;
+        case 1:
+        case 3:
+          if (this.checkAvailableSpaceExists(shapePointers[0],['up', 'up']) &&
+              this.checkAvailableSpaceExists(shapePointers[1],['left']) &&
+              this.checkAvailableSpaceExists(shapePointers[2],['left'])){
+            shapePointers[0] = shapePointers[0].up.up;
+            shapePointers[1] = shapePointers[1].left;
+            shapePointers[2] = shapePointers[2].left;
+            if (this.activeShape.rotation === 3){
+              this.activeShape.rotation = 0;
+            } else {
+              ++this.activeShape.rotation;
+            }
+          }
+          break;
+      }
+    },
+    rotateZ(){
+      let shapePointers = this.activeShape.pointers;
+      switch (this.activeShape.rotation) {
+        case 0:
+        case 2:
+          if (this.checkAvailableSpaceExists(shapePointers[2],['left']) &&
+              this.checkAvailableSpaceExists(shapePointers[1],['left']) &&
+              this.checkAvailableSpaceExists(shapePointers[0],['down','down'])){
+            shapePointers[2] = shapePointers[2].left;
+            shapePointers[1] = shapePointers[1].left;
+            shapePointers[0] = shapePointers[0].down.down
+            ++this.activeShape.rotation;
+          }
+          break;
+        case 1:
+        case 3:
+          if (this.checkAvailableSpaceExists(shapePointers[0],['up', 'up']) &&
+              this.checkAvailableSpaceExists(shapePointers[1],['right']) &&
+              this.checkAvailableSpaceExists(shapePointers[2],['right'])){
+            shapePointers[0] = shapePointers[0].up.up;
+            shapePointers[1] = shapePointers[1].right;
+            shapePointers[2] = shapePointers[2].right;
+            if (this.activeShape.rotation === 3){
+              this.activeShape.rotation = 0;
+            } else {
+              ++this.activeShape.rotation;
+            }
+          }
+          break;
+      }
+    },
+    rotateL(){
+      let shapePointers = this.activeShape.pointers;
+      switch (this.activeShape.rotation) {
+        case 0:
+          if (this.checkAvailableSpaceExists(shapePointers[1],['left']) &&
+              this.checkAvailableSpaceExists(shapePointers[2],['left']) &&
+              this.checkAvailableSpaceExists(shapePointers[3],['up']) &&
+              this.checkAvailableSpaceExists(shapePointers[0],['down'])
+          ){
+            shapePointers[1] = shapePointers[1].left;
+            shapePointers[2] = shapePointers[2].left;
+            shapePointers[3] = shapePointers[3].up;
+            shapePointers[0] = shapePointers[0].down;
+            ++this.activeShape.rotation;
+          }
+          break;
+        case 1:
+          if (this.checkAvailableSpaceExists(shapePointers[2],['right']) &&
+              this.checkAvailableSpaceExists(shapePointers[1],['up']) &&
+              this.checkAvailableSpaceExists(shapePointers[0],['up']) &&
+              this.checkAvailableSpaceExists(shapePointers[3],['left'])
+          ){
+            shapePointers[2] = shapePointers[2].right;
+            shapePointers[1] = shapePointers[1].up;
+            shapePointers[0] = shapePointers[0].up;
+            shapePointers[3] = shapePointers[3].left;
+            ++this.activeShape.rotation;
+          }
+          break;
+        case 2:
+          if (this.checkAvailableSpaceExists(shapePointers[1],['down','down']) &&
+              this.checkAvailableSpaceExists(shapePointers[2],['right']) &&
+              this.checkAvailableSpaceExists(shapePointers[3],['right']) &&
+              this.checkAvailableSpaceExists(shapePointers[0],['down','down'])
+          ){
+            shapePointers[1] = shapePointers[1].down.down;
+            shapePointers[2] = shapePointers[2].right;
+            shapePointers[3] = shapePointers[3].right;
+            shapePointers[0] = shapePointers[0].down.down;
+            ++this.activeShape.rotation;
+          }
+          break;
+
+        case 3:
+          // reset pointer positions back to rotation 0
+          if (this.checkAvailableSpaceExists(shapePointers[1],['up','up']) &&
+              this.checkAvailableSpaceExists(shapePointers[1],['right']) &&
+              this.checkAvailableSpaceExists(shapePointers[0],['left'])
+          ){
+            shapePointers[0] = shapePointers[0].up.up;
+            shapePointers[1] = shapePointers[0].down;
+            shapePointers[2] = shapePointers[1].down;
+            shapePointers[3] = shapePointers[2].right;
+            this.activeShape.rotation = 0;
+          }
+          break;
+      }
+    },
+    rotateJ(){
+      let shapePointers = this.activeShape.pointers;
+      switch (this.activeShape.rotation) {
+        case 0:
+          if (this.checkAvailableSpaceExists(shapePointers[2],['right']) &&
+              this.checkAvailableSpaceExists(shapePointers[1],['left'])
+          ){
+            shapePointers[1] = shapePointers[1].left;
+            shapePointers[0] = shapePointers[2].right;
+            ++this.activeShape.rotation;
+          }
+          break;
+        case 1:
+          if (this.checkAvailableSpaceExists(shapePointers[0],['up', 'up']) &&
+              this.checkAvailableSpaceExists(shapePointers[2],['up']) &&
+              this.checkAvailableSpaceExists(shapePointers[2],['up','up'])
+          ){
+            shapePointers[0] = shapePointers[0].up.up;
+            shapePointers[2] = shapePointers[0].left;
+            shapePointers[1] = shapePointers[1].right;
+            shapePointers[3] = shapePointers[3].right;
+            ++this.activeShape.rotation;
+          }
+          break;
+        case 2:
+          if (this.checkAvailableSpaceExists(shapePointers[1],['left']) &&
+              this.checkAvailableSpaceExists(shapePointers[3],['right']) &&
+              this.checkAvailableSpaceExists(shapePointers[0],['down'])
+          ){
+            shapePointers[1] = shapePointers[1].left;
+            shapePointers[3] = shapePointers[3].right;
+            shapePointers[2] = shapePointers[2].down;
+            shapePointers[0] = shapePointers[0].down;
+            ++this.activeShape.rotation;
+          }
+          break;
+
+        case 3:
+          // reset pointer positions back to rotation 0
+          if (this.checkAvailableSpaceExists(shapePointers[1],['down']) &&
+              this.checkAvailableSpaceExists(shapePointers[2],['down']) &&
+              this.checkAvailableSpaceExists(shapePointers[2],['up'])
+          ){
+            shapePointers[2] = shapePointers[2].down;
+            shapePointers[3] = shapePointers[2].left;
+            shapePointers[1] = shapePointers[2].up;
+            shapePointers[0] = shapePointers[1].up;
+            this.activeShape.rotation = 0;
+          }
+          break;
+      }
+    },
+    rotateT(){
+      let shapePointers = this.activeShape.pointers;
+      switch (this.activeShape.rotation) {
+        case 0:
+          if (this.checkAvailableSpaceExists(shapePointers[2],['up'])){
+            shapePointers[1] = shapePointers[2].up;
+            ++this.activeShape.rotation;
+          }
+          break;
+        case 1:
+          if (this.checkAvailableSpaceExists(shapePointers[2],['right'])){
+            shapePointers[3] = shapePointers[2].right;
+            ++this.activeShape.rotation;
+          }
+          break;
+        case 2:
+          if (this.checkAvailableSpaceExists(shapePointers[2],['down'])){
+            shapePointers[0] = shapePointers[2].down;
+            ++this.activeShape.rotation;
+          }
+          break;
+
+        case 3:
+          // reset pointer positions back to rotation 0
+          if (this.checkAvailableSpaceExists(shapePointers[2],['left'])){
+            shapePointers[0] = shapePointers[2].left;
+            shapePointers[3] = shapePointers[2].down;
+            shapePointers[1] = shapePointers[2].right;
+            this.activeShape.rotation = 0;
+          }
+          break;
+      }
     },
     addPoints(points){
       this.score += points;
@@ -268,7 +557,7 @@ export default {
           this.move('down');
           break;
         case 82:
-          this.loadQueue();
+          this.rotateShape();
           break;
       }
     }

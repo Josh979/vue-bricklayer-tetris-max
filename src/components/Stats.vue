@@ -53,7 +53,7 @@ export default {
         }
       }
       .value{
-        @apply mt-3 py-2;
+        @apply mt-3 py-2 text-xl font-bold;
         background: #aeaeae;
         color:black;
       }
