@@ -5,6 +5,8 @@
         <button @click="startGame()" class="start-button text-2xl p-4 font-bold uppercase">Start Game</button>
       </div>
       <div v-if="spacesInitialized" class="board-wrapper">
+        <div class="absolute top-1/2 text-4xl z-10  py-4 game-over-banner w-full text-center" v-if="!active">Game Over</div>
+
         <div class="flex flex-col">
           <div v-for="(row, rIndex) in config.rows" class="flex" :key="`col${rIndex}`">
             <template v-if="rIndex > 1">
@@ -436,10 +438,17 @@ export default {
       this.activeShape.pointers.forEach((pointer) => {
         pointer.occupied = this.activeShape.type;
       })
-      console.log(this.rowEliminationCheck());
-      this.spawnShape();
+      this.rowEliminationCheck();
+      // check if threshold passed
+      if (this.spaces[0].find(item => item.occupied !== false)){
+        this.gameOver();
+      }
+      if (this.active){
+        this.spawnShape();
+      }
     },
     gameOver() {
+      clearInterval(this.activeInterval);
       this.updateHighScore();
       this.active = false;
     },
@@ -663,6 +672,9 @@ export default {
 .board-wrapper{
   border: 2px solid blue;
   background: black;
+  .game-over-banner{
+    background: blue;
+  }
 }
 .space{
   position:relative;
