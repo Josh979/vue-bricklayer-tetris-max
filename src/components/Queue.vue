@@ -1,6 +1,6 @@
 <template>
   <div class="queue-wrapper flex justify-center relative mr-10">
-    <div class="absolute left-0 p-2 text-xl text-yellow-200">Next:</div>
+    <div class="absolute left-0 p-2 text-xl text-yellow-200" @dblclick="toggleDevMenu">Next:</div>
     <div class="shape m-auto">
       <div class="grid" :class="getNextShape">
         <div class="row flex">
@@ -29,7 +29,7 @@
 </template>
 
 <script>
-import {mapGetters} from 'vuex';
+import {mapGetters, mapActions} from 'vuex';
 
 export default {
   name: 'Queue',
@@ -40,6 +40,11 @@ export default {
   computed: {
     ...mapGetters([
       "getNextShape",
+    ])
+  },
+  methods:{
+    ...mapActions([
+        "toggleDevMenu"
     ])
   }
 }

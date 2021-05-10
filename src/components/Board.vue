@@ -10,27 +10,18 @@
             <template v-if="rIndex > 1">
               <div v-for="(col, cIndex) in config.columns" class="space" :class="spaces[rIndex][cIndex].type"
                    :key="`space${cIndex},${rIndex}`">
-                <span>{{ spaces[rIndex][cIndex].occupied ? 'y' : '' }}</span>
+                <template v-if="isOccupiedSpace(rIndex,cIndex)">
+                  <div class="space" :class="spaces[rIndex][cIndex].occupied"></div>
+                </template>
                 <template v-if="isActiveShape(rIndex,cIndex)">
-                  <div class="space" :class="activeShape.type"><span v-if="dev.showPointers">{{activeShape.pointers.indexOf(spaces[rIndex][cIndex])}}</span></div>
+                  <div class="space" :class="activeShape.type"><span v-if="getDevPointers">{{activeShape.pointers.indexOf(spaces[rIndex][cIndex])}}</span></div>
                 </template>
               </div>
             </template>
           </div>
         </div>
       </div>
-      <div class="mb-4" v-else>
-        <h1 class="text-5xl mt-10">Game Over</h1>
-        <div class="mt-4 mb-10">Refresh the page to restart</div>
 
-        <div class="text-xl mb-3 uppercase">{{newHighScore ? 'New' : ''}} High Score: <span>{{highScore}}</span></div>
-
-        <div v-if="!newHighScore" class="my-2 uppercase">
-          This score: {{getScore}}
-        </div>
-
-
-      </div>
     </div>
   </div>
 
@@ -49,12 +40,11 @@ export default {
         columns: 10,
       },
       dev:{
-        showPointers: false,
+        showPointers: true,
       },
       queue: null,
       started: false,
       active: true,
-      score: 0,
       //spaces will be moved to store
       spaces:[],
       spacesInitialized: false,
@@ -72,6 +62,7 @@ export default {
   computed:{
     ...mapGetters([
       "getShape",
+      "getDevPointers",
       "getNextShape",
       "getQueue",
     ]),
@@ -94,6 +85,8 @@ export default {
     ...mapActions([
       "processQueue",
       "loadQueue",
+      "increaseEliminatedRows",
+      "addPoints"
     ]),
 
     startGame(){
@@ -113,13 +106,13 @@ export default {
     move(direction){
       const length = this.activeShape.pointers.length;
       const validation = this.activeShape.pointers.filter((item) => {
-        return item[direction] !== null
+        return item[direction] !== null && !item[direction].occupied;
       }).length;
       if (length === validation){
         this.activeShape.pointers = this.activeShape.pointers.map((x) => {
           return x[direction];
         })
-      }
+      } else return false;
     },
     rotateClockwise(){},
     rotateCounterClockwise(){},
@@ -419,16 +412,31 @@ export default {
       }
     },
     releaseShape(){
-      //this.activeShape.pointers.push
-    },
-    addPoints(points){
-      this.score += points;
+      //hard drop score appears to be 1 point for every row passed between the lowest space of the shape and where it's lowest space comes to rest.
+      let i = 0;
+      while(i < 20){
+        if(this.move('down') === false){
+          break;
+        }
+        ++i;
+      }
+      this.addPoints(i);
+      this.activeShape.pointers.forEach((pointer) => {
+        pointer.occupied = this.activeShape.type;
+      })
+      console.log(this.rowEliminationCheck());
+      this.spawnShape();
     },
     gameOver() {
       this.updateHighScore();
       this.active = false;
     },
     levelUp(){
+      // level 2 at score 2000?
+      // level 3 at score 4500?
+      // level 4 at score 6000?
+      // level 5 between 7000-7900?
+      // level 6 at 9500?
       const audio = new Audio(require('@/assets/sounds/levelup.mp3'));
       audio.play();
     },
@@ -445,8 +453,57 @@ export default {
       }
       return true;
     },
+    isOccupiedSpace(x,y){
+      return this.spaces[x][y].occupied;
+    },
     isActiveShape(x,y){
       return this.activeShape.pointers.includes(this.spaces[x][y]);
+    },
+    rowEliminationCheck(){
+      //this can probably be optimized by storing a pointer to each row for lookups
+      let completedRows = [];
+      for (let i = 0; i < this.spaces.length; ++i){
+        if (!this.spaces[i].find((space) => space.occupied === false)){
+          completedRows.push(i);
+        }
+      }
+      if (completedRows.length){
+        return this.eliminateRows(completedRows);
+      }
+      return false;
+    },
+    // pass array of indexes of rows to clear
+    eliminateRows(arr){
+
+      // clear rows
+      arr.forEach((row) => {
+        this.spaces[row].forEach((space) => {
+          space.occupied = false;
+        })
+      })
+
+      //for each cleared row, starting at the cleared row with the lowest index, move all pointer values with a lower index down 1.
+      arr.forEach((row) => {
+        for (let i = row; i > 0; --i){
+          // eslint-disable-next-line no-unused-vars
+          this.spaces[i].forEach((space) => {
+            space.occupied = space.up.occupied;
+          })
+        }
+      })
+
+      // updated rows stat
+      this.increaseEliminatedRows(arr.length)
+      //todo - add score for each cleared row
+
+      // score is 1000 for a 4 row clear
+      // score is 600 for a 3 row clear
+      // score is 300 for a 2 row clear
+      // score is 100 for a single row clear
+
+
+
+      return true;
     },
     buildShapes(){
       const I = [
@@ -546,7 +603,7 @@ export default {
     handleKeydown(e) {
       switch (e.keyCode) {
         case 32:
-          this.spawnShape();
+          this.releaseShape();
           break;
         case 37:
           this.move('left');

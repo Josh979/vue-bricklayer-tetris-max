@@ -2,6 +2,10 @@ import { createStore } from 'vuex'
 
 export default createStore({
   state: {
+    dev:{
+      menu: false,
+      showPointers: false,
+    },
     score: 0,
     level: 1,
     rows: {
@@ -12,6 +16,12 @@ export default createStore({
     spaces:[]
   },
   getters: {
+    getDevMenu: state => {
+      return  state.dev.menu;
+    },
+    getDevPointers: state => {
+      return  state.dev.showPointers;
+    },
     getScore: state => {
       return  state.score;
     },
@@ -42,6 +52,21 @@ export default createStore({
       const newShape = state.shapes[randomIndex];
       state.queue.push(newShape);
     },
+    increaseEliminatedRows(state, rowsToAdd){
+      state.rows.eliminated += rowsToAdd;
+    },
+    addPoints(state, points){
+      state.score += points;
+    },
+
+    //devmode
+    toggleDevMenu(state){
+      state.dev.menu = !state.dev.menu;
+    },
+    toggleDevPointers(state){
+      state.dev.showPointers = !state.dev.showPointers;
+    },
+
   },
   actions: {
     processQueue({commit}){
@@ -50,6 +75,20 @@ export default createStore({
     },
     loadQueue({commit}){
       commit('loadQueue')
+    },
+    increaseEliminatedRows({commit}, payload){
+      commit('increaseEliminatedRows', payload)
+    },
+    addPoints({commit}, payload){
+      commit('addPoints', payload)
+    },
+
+    //devmode
+    toggleDevMenu({commit}){
+      commit('toggleDevMenu')
+    },
+    toggleDevPointers({commit}){
+      commit('toggleDevPointers')
     }
   },
   modules: {
