@@ -6,6 +6,7 @@
       </div>
       <div v-if="spacesInitialized" class="board-wrapper">
         <div class="absolute top-1/2 text-4xl z-10  py-4 game-over-banner w-full text-center" v-if="!active">Game Over</div>
+        <div class="absolute top-1/2 text-4xl z-10  py-4 game-over-banner w-full text-center" v-if="paused">Paused</div>
 
         <div class="flex flex-col">
           <div v-for="(row, rIndex) in config.rows" class="flex" :key="`col${rIndex}`">
@@ -47,6 +48,7 @@ export default {
       queue: null,
       started: false,
       active: true,
+      paused: false,
       //spaces will be moved to store
       spaces:[],
       activeInterval: null,
@@ -98,7 +100,6 @@ export default {
       this.loadQueue();
       this.loadQueue();
       this.spawnShape();
-
       window.addEventListener('keydown', this.handleKeydown, null);
     },
     startMusic(){
@@ -107,29 +108,36 @@ export default {
       music.loop = true;
     },
     move(direction){
-      const length = this.activeShape.pointers.length;
-      const validation = this.activeShape.pointers.filter((item) => {
-        return item[direction] !== null && !item[direction].occupied;
-      }).length;
-      if (length === validation){
-        this.activeShape.pointers = this.activeShape.pointers.map((x) => {
-          return x[direction];
-        })
-        return true;
-      } else {
-        return false;
+      if (!this.paused){
+        const length = this.activeShape.pointers.length;
+        const validation = this.activeShape.pointers.filter((item) => {
+          return item[direction] !== null && !item[direction].occupied;
+        }).length;
+        if (length === validation){
+          this.activeShape.pointers = this.activeShape.pointers.map((x) => {
+            return x[direction];
+          })
+          return true;
+        } else {
+          return false;
+        }
       }
     },
     //rotateClockwise(){},
     //rotateCounterClockwise(){},
-    spawnShape(){
-      this.activeShape = this.buildActiveShape();
+    setActiveInterval(){
+      clearInterval(this.activeInterval);
+      this.activeInterval = null;
       this.activeInterval = setInterval(() => {
         if (!this.move('down')){
           this.releaseShape();
         }
       },1000)
     },
+    spawnShape(){
+      this.activeShape = this.buildActiveShape();
+      this.setActiveInterval();
+      },
     buildActiveShape(){
       this.processQueue();
       const type = this.getShape;
@@ -138,28 +146,30 @@ export default {
       return {type,pointers, rotation}
     },
     rotateShape(){
-      switch (this.activeShape.type) {
-        case 'I':
-          this.rotateI();
-          break;
-        case 'O':
-          /** Free dude! **/
-          break;
-        case 'S':
-          this.rotateS();
-          break;
-        case 'Z':
-          this.rotateZ();
-          break;
-        case 'L':
-          this.rotateL();
-          break;
-        case 'J':
-          this.rotateJ();
-          break;
-        case 'T':
-          this.rotateT();
-          break;
+      if (!this.paused){
+        switch (this.activeShape.type) {
+          case 'I':
+            this.rotateI();
+            break;
+          case 'O':
+            /** Free dude! **/
+            break;
+          case 'S':
+            this.rotateS();
+            break;
+          case 'Z':
+            this.rotateZ();
+            break;
+          case 'L':
+            this.rotateL();
+            break;
+          case 'J':
+            this.rotateJ();
+            break;
+          case 'T':
+            this.rotateT();
+            break;
+        }
       }
     },
     // have to walk the path since we could likely encounter a null
@@ -423,34 +433,45 @@ export default {
       }
     },
     releaseShape(){
-      if (this.activeInterval){
-        clearInterval(this.activeInterval);
-      }
-      //hard drop score appears to be 1 point for every row passed between the lowest space of the shape and where it's lowest space comes to rest.
-      let i = 0;
-      while(i < 20){
-        if(this.move('down') === false){
-          break;
+      if (!this.paused){
+        if (this.activeInterval){
+          clearInterval(this.activeInterval);
         }
-        ++i;
-      }
-      this.addPoints(i);
-      this.activeShape.pointers.forEach((pointer) => {
-        pointer.occupied = this.activeShape.type;
-      })
-      this.rowEliminationCheck();
-      // check if threshold passed
-      if (this.spaces[0].find(item => item.occupied !== false)){
-        this.gameOver();
-      }
-      if (this.active){
-        this.spawnShape();
+        //hard drop score appears to be 1 point for every row passed between the lowest space of the shape and where it's lowest space comes to rest.
+        let i = 0;
+        while(i < 20){
+          if(this.move('down') === false){
+            break;
+          }
+          ++i;
+        }
+        this.addPoints(i);
+        this.activeShape.pointers.forEach((pointer) => {
+          pointer.occupied = this.activeShape.type;
+        })
+        this.rowEliminationCheck();
+        // check if threshold passed
+        if (this.spaces[0].find(item => item.occupied !== false)){
+          this.gameOver();
+        }
+        if (this.active){
+          this.spawnShape();
+        }
       }
     },
     gameOver() {
       clearInterval(this.activeInterval);
       this.updateHighScore();
       this.active = false;
+    },
+    togglePause(){
+      if (this.activeInterval !== null){
+        clearInterval(this.activeInterval);
+        this.activeInterval = null;
+      } else {
+        this.setActiveInterval();
+      }
+      this.paused = !this.paused;
     },
     levelUp(){
       // level 2 at score 2000?
@@ -646,14 +667,17 @@ export default {
         case 37:
           this.move('left');
           break;
-        // case 38:
-        //   this.move('up'); // dev only
-        //   break;
+          // case 38:
+          //   this.move('up'); // dev only
+          //   break;
         case 39:
           this.move('right');
           break;
         case 40:
           this.move('down');
+          break;
+        case 80:
+          this.togglePause();
           break;
         case 82:
           this.rotateShape();
