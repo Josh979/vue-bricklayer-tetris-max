@@ -64,6 +64,7 @@ export default {
         rotation: 0,
         coordinates: []
       },
+      occupiedArea:[],
       shapes: {},
     }
   },
@@ -416,6 +417,9 @@ export default {
           }
           break;
       }
+    },
+    releaseShape(){
+      //this.activeShape.pointers.push
     },
     addPoints(points){
       this.score += points;
