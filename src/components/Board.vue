@@ -47,6 +47,7 @@ export default {
       active: true,
       //spaces will be moved to store
       spaces:[],
+      activeInterval: null,
       spacesInitialized: false,
       activeShape: {
         pointers: [], // use this instead of coords
@@ -112,12 +113,20 @@ export default {
         this.activeShape.pointers = this.activeShape.pointers.map((x) => {
           return x[direction];
         })
-      } else return false;
+        return true;
+      } else {
+        return false;
+      }
     },
-    rotateClockwise(){},
-    rotateCounterClockwise(){},
+    //rotateClockwise(){},
+    //rotateCounterClockwise(){},
     spawnShape(){
       this.activeShape = this.buildActiveShape();
+      this.activeInterval = setInterval(() => {
+        if (!this.move('down')){
+          this.releaseShape();
+        }
+      },1000)
     },
     buildActiveShape(){
       this.processQueue();
@@ -412,6 +421,9 @@ export default {
       }
     },
     releaseShape(){
+      if (this.activeInterval){
+        clearInterval(this.activeInterval);
+      }
       //hard drop score appears to be 1 point for every row passed between the lowest space of the shape and where it's lowest space comes to rest.
       let i = 0;
       while(i < 20){
@@ -494,14 +506,31 @@ export default {
 
       // updated rows stat
       this.increaseEliminatedRows(arr.length)
-      //todo - add score for each cleared row
-
-      // score is 1000 for a 4 row clear
-      // score is 600 for a 3 row clear
-      // score is 300 for a 2 row clear
-      // score is 100 for a single row clear
-
-
+      if (arr.length){
+        // score is 1000 for a 4 row clear
+        // score is 600 for a 3 row clear
+        // score is 300 for a 2 row clear
+        // score is 100 for a single row clear
+        let rowEliminationPoints = 0;
+        switch(arr.length){
+          case 1:
+            rowEliminationPoints = 100;
+            break;
+          case 2:
+            rowEliminationPoints = 300;
+            break;
+          case 3:
+            rowEliminationPoints = 600;
+            break;
+          case 4:
+            rowEliminationPoints = 1000;
+            break;
+          default:
+            rowEliminationPoints = 0;
+            break;
+        }
+        this.addPoints(rowEliminationPoints);
+      }
 
       return true;
     },
@@ -608,9 +637,9 @@ export default {
         case 37:
           this.move('left');
           break;
-        case 38:
-          this.move('up'); // dev only
-          break;
+        // case 38:
+        //   this.move('up'); // dev only
+        //   break;
         case 39:
           this.move('right');
           break;
