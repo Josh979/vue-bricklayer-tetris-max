@@ -1,5 +1,6 @@
 {
   "name": "vue-bricklayer",
+  "description": "A clone of Tetris Max/Bricklayer - Developed By Josh Mielke",
   "version": "0.1.0",
   "private": false,
   "scripts": {

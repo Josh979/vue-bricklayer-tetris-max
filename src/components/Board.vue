@@ -750,6 +750,11 @@ export default {
   justify-content: center;
   align-content: center;
   align-items: center;
+  &.sphere{
+    &.I,&.T,&.Z,&.S,&.L,&.J,&.O {
+      border-radius: 50px;
+    }
+  }
   &.I,&.T,&.Z,&.S,&.L,&.J,&.O{
     border-radius: 4px;
     border:{
