@@ -5,13 +5,18 @@
         <button @click="startGame()" class="start-button text-2xl p-4 font-bold uppercase">Start Game</button>
       </div>
       <div v-if="spacesInitialized" class="board-wrapper">
-        <div class="absolute top-1/2 text-4xl z-10  py-4 game-over-banner w-full text-center" v-if="!active">Game Over</div>
+        <div class="absolute top-1/2 text-4xl z-30  py-4 game-over-banner w-full text-center" v-if="!active">
+          Game Over
+          <div class="flex justify-center">
+            <button class="text-sm py-1 rounded-md px-3 border mt-2" @click="restartGame()">Play again?</button>
+          </div>
+        </div>
         <div class="absolute top-1/2 text-4xl z-10  py-4 game-over-banner w-full text-center" v-if="paused">Paused</div>
 
         <div class="flex flex-col">
           <div v-for="(row, rIndex) in config.rows" class="relative flex" :key="`col${rIndex}`">
             <template v-if="rowIsBeingCleared(rIndex) || true">
-              <div class="absolute transition-all bg-transparent w-full z-30 h-full" :class="rowIsBeingCleared(rIndex) ? 'bg-yellow-400': ''"></div>
+              <div class="absolute transition-all bg-transparent w-full z-10 h-full" :class="rowIsBeingCleared(rIndex) ? 'bg-yellow-400': ''"></div>
             </template>
             <template v-if="rIndex > 1">
               <div v-for="(col, cIndex) in config.columns" class="space" :class="spaces[rIndex][cIndex].type"
@@ -75,6 +80,7 @@ export default {
       "getDevPointers",
       "getNextShape",
       "getScore",
+      "getSpeed",
       "getQueue",
     ]),
     highScore(){
@@ -94,7 +100,10 @@ export default {
       "loadQueue",
       "increaseEliminatedRows",
       "addPoints",
-      "increaseLevel"
+      "increaseLevel",
+      "increaseSpeed",
+      "increaseShapesPlaced",
+      "resetGame"
     ]),
 
     startGame(){
@@ -135,7 +144,7 @@ export default {
         if (!this.move('down')){
           this.releaseShape();
         }
-      },1000)
+      },this.getSpeed)
     },
     spawnShape(){
       this.activeShape = this.buildActiveShape();
@@ -436,7 +445,7 @@ export default {
       }
     },
     releaseShape(){
-      if (!this.paused){
+      if (!this.paused && this.active){
         if (this.activeInterval){
           clearInterval(this.activeInterval);
         }
@@ -449,6 +458,7 @@ export default {
           ++i;
         }
         this.addPoints(i);
+        this.increaseShapesPlaced();
 
         this.activeShape.pointers.forEach((pointer) => {
           pointer.occupied = this.activeShape.type;
@@ -457,7 +467,7 @@ export default {
         this.checkLevel();
 
         // check if threshold passed
-        if (this.spaces[0].find(item => item.occupied !== false)){
+        if (this.spaces[1].find(item => item.occupied !== false)){
           this.gameOver();
         }
         if (this.active){
@@ -468,7 +478,18 @@ export default {
     gameOver() {
       clearInterval(this.activeInterval);
       this.updateHighScore();
+      this.activeShape.pointers = [];
       this.active = false;
+    },
+    restartGame(){
+      this.resetGame();
+      this.spaces.forEach((row) => {
+        row.forEach((space) => {
+          space.occupied = false;
+        })
+      });
+      this.active = true;
+      this.startGame();
     },
     togglePause(){
       if (this.activeInterval !== null){
@@ -485,9 +506,10 @@ export default {
       // level 4 at score 6000?
       // level 5 between 7000-7900?
       // level 6 at 9500?
+      this.increaseSpeed();
       this.increaseLevel();
-      const audio = new Audio(require('@/assets/sounds/levelup.mp3'));
-      audio.play();
+      // const audio = new Audio(require('@/assets/sounds/levelup.mp3'));
+      // audio.play();
     },
     updateHighScore(){
       if (localStorage.getItem('highscore') < this.score){
@@ -721,8 +743,8 @@ export default {
 }
 .space{
   position:relative;
-  width: 35px;
-  height: 35px;
+  width: 32px;
+  height: 32px;
   border:1px solid #111;
   display: flex;
   justify-content: center;
@@ -733,30 +755,45 @@ export default {
     border:{
       top: 2px solid #ffffff75;
       left: 2px solid #ffffff75;
-      bottom: 2px solid #000000;
+      bottom: 2px solid #00000090;
       right: 2px solid #00000020;
     }
   }
   &.I{
-    background-color: blue;
+    background: linear-gradient(to top left, darkblue 0%, blue 75%);
+    //border:{
+    //  top: 2px solid transparentize(lighten(blue,25),0.1);
+    //  left: 2px solid transparentize(lighten(blue,25),0.1);
+    //  bottom: 2px solid transparentize(darken(blue,15),0.1);
+    //  right: 2px solid transparentize(darken(blue,25),0.1);
+    //}
+    //background-color: blue;
   }
   &.T{
-    background-color: lime;
+    background: linear-gradient(to top left, darkgreen 0%, lime 75%);
+    //background-color: lime;
   }
   &.J{
-    background-color: red;
+    //background-color: red;
+    background: linear-gradient(to top left, darkred 0%, red 75%);
   }
   &.L{
-    background-color: cyan;
+    //background-color: cyan;
+    background: linear-gradient(to top left, darkcyan 0%, cyan 75%);
+
   }
   &.S{
-    background-color: yellow;
+    //background-color: yellow;
+    background: linear-gradient(to top left, darken(yellow, 15) 0%, yellow 75%);
   }
   &.Z{
-    background-color: white;
+    background: linear-gradient(to top left, grey 0%, white 75%);
+    //background-color: white;
+    //background-image: url("/img/patterns/shapes/z.png");
   }
   &.O{
-    background-color: darkmagenta;
+    //background-color: darkmagenta;
+    background: linear-gradient(to top left, indigo 0%, darkmagenta 75%);
   }
 }
 .start-button{

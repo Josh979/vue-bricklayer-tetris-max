@@ -23,8 +23,13 @@ export default {
 </script>
 
 <style lang="scss">
+
 html{
-  background:#333;
+  background-color:black;
+  //background-image: url("https://www.transparenttextures.com/patterns/diagmonds.png");
+  //background-image: url("https://www.transparenttextures.com/patterns/black-felt.png");
+   background-image: url("/img/patterns/escheresque-dark.png");
+
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;

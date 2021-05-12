@@ -65,13 +65,15 @@ export default {
 
     .grid.I {
       .row > .space.I {
-        background-color: blue;
+        //background-color: blue;
+        background: linear-gradient(to top left, darkblue 0%, blue 75%);
       }
     }
 
     .grid.T {
       .row .space.T {
-        background-color: lime;
+        //background-color: lime;
+        background: linear-gradient(to top left, darkgreen 0%, lime 75%);
       }
     }
 
@@ -82,7 +84,8 @@ export default {
       }
 
       .row .space.O {
-        background-color: purple;
+        //background-color: purple;
+        background: linear-gradient(to top left, indigo 0%, darkmagenta 75%);
       }
     }
 
@@ -93,7 +96,9 @@ export default {
       }
 
       .row .space.J {
-        background-color: red;
+        //background-color: red;
+        background: linear-gradient(to top left, darkred 0%, red 75%);
+
       }
     }
 
@@ -103,7 +108,8 @@ export default {
         right: 20px;
       }
       .row .space.L {
-        background-color: cyan;
+        //background-color: cyan;
+        background: linear-gradient(to top left, darkcyan 0%, cyan 75%);
       }
     }
 
@@ -114,7 +120,8 @@ export default {
       }
 
       .row .space.S {
-        background-color: yellow;
+        //background-color: yellow;
+        background: linear-gradient(to top left, darken(yellow, 15) 0%, yellow 75%);
       }
     }
 
@@ -125,7 +132,9 @@ export default {
       }
 
       .row .space.Z {
-        background-color: white;
+        //background-color: white;
+        //background-image: url("/img/patterns/shapes/z.png");
+        background: linear-gradient(to top left, grey 0%, white 75%);
       }
     }
 
@@ -144,11 +153,12 @@ export default {
   .grid.I .space.I, .grid.T .space.T, .grid.Z .space.Z,
   .grid.S .space.S, .grid.L .space.L, .grid.J .space.J,
   .grid.O .space.O {
-    border-radius: 3px;
-    border: {
+    border-radius: 4px;
+    outline: 1px solid black;
+    border:{
       top: 2px solid #ffffff75;
       left: 2px solid #ffffff75;
-      bottom: 2px solid #000000;
+      bottom: 2px solid #00000090;
       right: 2px solid #00000020;
     }
   }

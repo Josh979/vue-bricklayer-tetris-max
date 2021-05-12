@@ -7,11 +7,13 @@ export default createStore({
       showPointers: false,
     },
     score: 0,
+    speed: 1000,
     level: 1,
     rows: {
       eliminated: 0
     },
     shapes:['I','L','J','T','O','S','Z'],
+    shapesPlaced: 0,
     queue:[],
     spaces:[]
   },
@@ -22,11 +24,17 @@ export default createStore({
     getDevPointers: state => {
       return  state.dev.showPointers;
     },
+    getShapesPlaced: state => {
+      return  state.shapesPlaced;
+    },
     getScore: state => {
       return  state.score;
     },
     getLevel: state => {
       return  state.level;
+    },
+    getSpeed: state => {
+      return  state.speed;
     },
     getEliminatedRows: state => {
       return  state.rows.eliminated;
@@ -42,6 +50,14 @@ export default createStore({
     }
   },
   mutations: {
+    resetGame(state){
+      state.queue = [];
+      state.speed = 1000;
+      state.level = 1;
+      state.score = 0;
+      state.shapesPlaced = 0;
+      state.rows.eliminated = 0;
+    },
     processQueue(state){
       state.activeShape = state.queue.shift();
     },
@@ -61,6 +77,14 @@ export default createStore({
     increaseLevel(state){
       ++state.level;
     },
+    increaseShapesPlaced(state){
+      ++state.shapesPlaced;
+    },
+    increaseSpeed(state){
+      if (state.speed > 200){
+        state.speed = state.speed - 100;
+      }
+    },
 
     //devmode
     toggleDevMenu(state){
@@ -72,6 +96,9 @@ export default createStore({
 
   },
   actions: {
+    resetGame({commit}){
+      commit('resetGame')
+    },
     processQueue({commit}){
       commit('loadQueue')
       commit('processQueue')
@@ -82,8 +109,14 @@ export default createStore({
     increaseEliminatedRows({commit}, payload){
       commit('increaseEliminatedRows', payload)
     },
+    increaseShapesPlaced({commit}){
+      commit('increaseShapesPlaced')
+    },
     increaseLevel({commit}){
       commit('increaseLevel')
+    },
+    increaseSpeed({commit}){
+      commit('increaseSpeed')
     },
     addPoints({commit}, payload){
       commit('addPoints', payload)

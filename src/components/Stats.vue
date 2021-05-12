@@ -14,6 +14,8 @@
     </div>
     <div class=" p-2" v-if="getDevMenu">
       <button class="px-3 py-2 bg-black text-sm" @click="toggleDevPointers">Toggle Pointers</button>
+      <div class="my-2">Speed: {{getSpeed}}ms</div>
+      <div class="my-2">Shapes Placed: {{getShapesPlaced}}</div>
     </div>
 
   </div>
@@ -29,6 +31,8 @@ export default {
     ...mapGetters([
         "getScore",
         "getLevel",
+        "getShapesPlaced",
+        "getSpeed",
         "getEliminatedRows",
         "getDevMenu"
     ])
@@ -48,6 +52,8 @@ export default {
     width:175px;
     background: transparent;
     .stats-item{
+      border-radius: 3px;
+
       border:{
         top: 2px solid #999;
         left: 2px solid #999;
