@@ -71,7 +71,7 @@ export default {
 
     .grid.T {
       .row .space.T {
-        background-color: limegreen;
+        background-color: lime;
       }
     }
 
@@ -144,6 +144,7 @@ export default {
   .grid.I .space.I, .grid.T .space.T, .grid.Z .space.Z,
   .grid.S .space.S, .grid.L .space.L, .grid.J .space.J,
   .grid.O .space.O {
+    border-radius: 3px;
     border: {
       top: 2px solid #ffffff75;
       left: 2px solid #ffffff75;

@@ -12,11 +12,16 @@
       <div class="title">rows</div>
       <div class="value">{{getEliminatedRows}}</div>
     </div>
+    <div class=" p-2" v-if="getDevMenu">
+      <button class="px-3 py-2 bg-black text-sm" @click="toggleDevPointers">Toggle Pointers</button>
+    </div>
+
   </div>
+
 </template>
 
 <script>
-import {mapGetters} from 'vuex';
+import {mapActions, mapGetters} from 'vuex';
 
 export default {
   name: 'Stats',
@@ -24,7 +29,13 @@ export default {
     ...mapGetters([
         "getScore",
         "getLevel",
-        "getEliminatedRows"
+        "getEliminatedRows",
+        "getDevMenu"
+    ])
+  },
+  methods:{
+    ...mapActions([
+      "toggleDevPointers"
     ])
   }
 }

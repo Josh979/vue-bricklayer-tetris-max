@@ -9,7 +9,10 @@
         <div class="absolute top-1/2 text-4xl z-10  py-4 game-over-banner w-full text-center" v-if="paused">Paused</div>
 
         <div class="flex flex-col">
-          <div v-for="(row, rIndex) in config.rows" class="flex" :key="`col${rIndex}`">
+          <div v-for="(row, rIndex) in config.rows" class="relative flex" :key="`col${rIndex}`">
+            <template v-if="rowIsBeingCleared(rIndex) || true">
+              <div class="absolute transition-all bg-transparent w-full z-30 h-full" :class="rowIsBeingCleared(rIndex) ? 'bg-yellow-400': ''"></div>
+            </template>
             <template v-if="rIndex > 1">
               <div v-for="(col, cIndex) in config.columns" class="space" :class="spaces[rIndex][cIndex].type"
                    :key="`space${cIndex},${rIndex}`">
@@ -52,7 +55,9 @@ export default {
       //spaces will be moved to store
       spaces:[],
       activeInterval: null,
+      completedRowQueue: [],
       spacesInitialized: false,
+      nextLevel: 2000,
       activeShape: {
         pointers: [], // use this instead of coords
         type: null,
@@ -69,12 +74,9 @@ export default {
       "getShape",
       "getDevPointers",
       "getNextShape",
+      "getScore",
       "getQueue",
     ]),
-
-    getScore(){
-      return this.score;
-    },
     highScore(){
       return localStorage.getItem('highscore');
     },
@@ -91,7 +93,8 @@ export default {
       "processQueue",
       "loadQueue",
       "increaseEliminatedRows",
-      "addPoints"
+      "addPoints",
+      "increaseLevel"
     ]),
 
     startGame(){
@@ -446,10 +449,13 @@ export default {
           ++i;
         }
         this.addPoints(i);
+
         this.activeShape.pointers.forEach((pointer) => {
           pointer.occupied = this.activeShape.type;
         })
         this.rowEliminationCheck();
+        this.checkLevel();
+
         // check if threshold passed
         if (this.spaces[0].find(item => item.occupied !== false)){
           this.gameOver();
@@ -479,6 +485,7 @@ export default {
       // level 4 at score 6000?
       // level 5 between 7000-7900?
       // level 6 at 9500?
+      this.increaseLevel();
       const audio = new Audio(require('@/assets/sounds/levelup.mp3'));
       audio.play();
     },
@@ -501,16 +508,25 @@ export default {
     isActiveShape(x,y){
       return this.activeShape.pointers.includes(this.spaces[x][y]);
     },
+    rowIsBeingCleared(rowIndex){
+        return (this.completedRowQueue.indexOf(rowIndex) !== -1)
+    },
+    checkLevel(){
+      if (this.getScore >= this.nextLevel){
+        this.levelUp();
+        this.nextLevel += 2000;
+      }
+    },
     rowEliminationCheck(){
       //this can probably be optimized by storing a pointer to each row for lookups
-      let completedRows = [];
+      this.completedRowQueue = [];
       for (let i = 0; i < this.spaces.length; ++i){
         if (!this.spaces[i].find((space) => space.occupied === false)){
-          completedRows.push(i);
+          this.completedRowQueue.push(i);
         }
       }
-      if (completedRows.length){
-        return this.eliminateRows(completedRows);
+      if (this.completedRowQueue.length){
+        return this.eliminateRows(this.completedRowQueue);
       }
       return false;
     },
@@ -560,6 +576,9 @@ export default {
             break;
         }
         this.addPoints(rowEliminationPoints);
+        setTimeout(() => {
+          this.completedRowQueue = [];
+        },100)
       }
 
       return true;
@@ -710,6 +729,7 @@ export default {
   align-content: center;
   align-items: center;
   &.I,&.T,&.Z,&.S,&.L,&.J,&.O{
+    border-radius: 4px;
     border:{
       top: 2px solid #ffffff75;
       left: 2px solid #ffffff75;
@@ -721,7 +741,7 @@ export default {
     background-color: blue;
   }
   &.T{
-    background-color: limegreen;
+    background-color: lime;
   }
   &.J{
     background-color: red;
@@ -736,7 +756,7 @@ export default {
     background-color: white;
   }
   &.O{
-    background-color: purple;
+    background-color: darkmagenta;
   }
 }
 .start-button{

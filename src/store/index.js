@@ -58,6 +58,9 @@ export default createStore({
     addPoints(state, points){
       state.score += points;
     },
+    increaseLevel(state){
+      ++state.level;
+    },
 
     //devmode
     toggleDevMenu(state){
@@ -78,6 +81,9 @@ export default createStore({
     },
     increaseEliminatedRows({commit}, payload){
       commit('increaseEliminatedRows', payload)
+    },
+    increaseLevel({commit}){
+      commit('increaseLevel')
     },
     addPoints({commit}, payload){
       commit('addPoints', payload)
