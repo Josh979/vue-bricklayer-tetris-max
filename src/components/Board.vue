@@ -57,6 +57,7 @@ export default {
       started: false,
       active: true,
       paused: false,
+      music: null,
       //spaces will be moved to store
       spaces:[],
       activeInterval: null,
@@ -112,12 +113,13 @@ export default {
       this.loadQueue();
       this.loadQueue();
       this.spawnShape();
+      this.startMusic();
       window.addEventListener('keydown', this.handleKeydown, null);
     },
     startMusic(){
-      const music = new Audio(require('@/assets/sounds/t-maxx.mp3'));
-      music.play();
-      music.loop = true;
+      this.music = new Audio(require('@/assets/music/intro.aac'));
+      this.music.play();
+      this.music.loop = true;
     },
     move(direction){
       if (!this.paused){
@@ -476,6 +478,9 @@ export default {
       }
     },
     gameOver() {
+      if (this.music !== null){
+        this.music.pause();
+      }
       clearInterval(this.activeInterval);
       this.updateHighScore();
       this.activeShape.pointers = [];
@@ -494,8 +499,10 @@ export default {
     togglePause(){
       if (this.activeInterval !== null){
         clearInterval(this.activeInterval);
+        this.music.pause();
         this.activeInterval = null;
       } else {
+        this.music.play();
         this.setActiveInterval();
       }
       this.paused = !this.paused;
