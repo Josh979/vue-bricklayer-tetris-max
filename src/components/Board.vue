@@ -480,6 +480,8 @@ export default {
     gameOver() {
       if (this.music !== null){
         this.music.pause();
+        this.music = new Audio(require('@/assets/music/game-over.aac'));
+        this.music.play();
       }
       clearInterval(this.activeInterval);
       this.updateHighScore();
