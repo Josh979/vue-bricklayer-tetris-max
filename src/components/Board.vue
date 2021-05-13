@@ -110,17 +110,18 @@ export default {
     startGame(){
       this.started = true;
       //this.startMusic();
+      this.startMusic();
+
       this.loadQueue();
       this.loadQueue();
       this.spawnShape();
-      this.startMusic();
       window.addEventListener('keydown', this.handleKeydown, null);
     },
     startMusic(){
       if (this.music !== null){
         this.music.pause();
       }
-      this.music = new Audio(require('@/assets/music/intro.aac'));
+      this.music = new Audio(require('@/assets/music/loop.aac'));
       this.music.play();
       this.music.loop = true;
     },
