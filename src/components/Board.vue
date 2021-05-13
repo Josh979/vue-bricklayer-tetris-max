@@ -1,5 +1,5 @@
 <template>
-  <div class="self-center justify-self-center">
+  <div class="justify-self-start">
     <div class="flex justify-center align-middle relative">
       <div v-show="!started" class="align-middle flex absolute justify-center self-center">
         <button @click="startGame()" class="start-button text-2xl p-4 font-bold uppercase">Start Game</button>
@@ -57,7 +57,11 @@ export default {
       started: false,
       active: true,
       paused: false,
-      music: null,
+      audio:{
+        music: null,
+        gameOver: null,
+        soundFX:{}
+      },
       //spaces will be moved to store
       spaces:[],
       activeInterval: null,
@@ -108,22 +112,30 @@ export default {
     ]),
 
     startGame(){
-      this.started = true;
-      //this.startMusic();
       this.startMusic();
+      this.started = true;
 
       this.loadQueue();
       this.loadQueue();
       this.spawnShape();
       window.addEventListener('keydown', this.handleKeydown, null);
     },
+    loadAudio(){
+      // Music
+      this.audio.music = new Audio(require('@/assets/music/loop.aac'));
+      this.audio.music.loop = true;
+      this.audio.gameOver = new Audio(require('@/assets/music/game-over.aac'));
+      // Sound FXs
+    },
     startMusic(){
-      if (this.music !== null){
-        this.music.pause();
+      if (this.audio.gameOver !== null){
+        this.audio.gameOver.pause();
       }
-      this.music = new Audio(require('@/assets/music/loop.aac'));
-      this.music.play();
-      this.music.loop = true;
+
+      if (this.audio.music !== null){
+        this.audio.music.currentTime = 0;
+        this.audio.music.play();
+      }
     },
     move(direction){
       if (!this.paused){
@@ -455,6 +467,7 @@ export default {
         if (this.activeInterval){
           clearInterval(this.activeInterval);
         }
+        let placedSound = new Audio(require('@/assets/sounds/wood-hit-hard-trimmed.wav'));
         //hard drop score appears to be 1 point for every row passed between the lowest space of the shape and where it's lowest space comes to rest.
         let i = 0;
         while(i < 20){
@@ -463,6 +476,7 @@ export default {
           }
           ++i;
         }
+        placedSound.play();
         this.addPoints(i);
         this.increaseShapesPlaced();
 
@@ -482,11 +496,15 @@ export default {
       }
     },
     gameOver() {
-      if (this.music !== null){
-        this.music.pause();
+      if (this.audio.music !== null){
+        this.audio.music.pause();
+        this.audio.music.currentTime = 0;
       }
-      this.music = new Audio(require('@/assets/music/game-over.aac'));
-      this.music.play();
+      this.audio.gameOver.currentTime = 0;
+      this.audio.gameOver.play();
+
+      let glassSound = new Audio(require('@/assets/sounds/glass-v-hammer.wav'));
+      glassSound.play();
 
       clearInterval(this.activeInterval);
       this.updateHighScore();
@@ -506,10 +524,10 @@ export default {
     togglePause(){
       if (this.activeInterval !== null){
         clearInterval(this.activeInterval);
-        this.music.pause();
+        this.audio.music.pause();
         this.activeInterval = null;
       } else {
-        this.music.play();
+        this.audio.music.play();
         this.setActiveInterval();
       }
       this.paused = !this.paused;
@@ -589,6 +607,8 @@ export default {
       // updated rows stat
       this.increaseEliminatedRows(arr.length)
       if (arr.length){
+        let clearedSFX = new Audio(require('@/assets/sounds/air-zoom-vacuum-trimmed.wav'));
+        clearedSFX.play();
         // score is 1000 for a 4 row clear
         // score is 600 for a 3 row clear
         // score is 300 for a 2 row clear
@@ -615,6 +635,7 @@ export default {
         setTimeout(() => {
           this.completedRowQueue = [];
         },100)
+
       }
 
       return true;
@@ -743,6 +764,7 @@ export default {
   created() {
     this.buildSpaces();
     this.buildShapes();
+    this.loadAudio();
   }
 }
 </script>

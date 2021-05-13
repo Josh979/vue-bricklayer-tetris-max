@@ -1,5 +1,5 @@
 <template>
-  <div class="queue-wrapper flex justify-center relative mr-10">
+  <div class="queue-wrapper flex self-start justify-center relative mr-10">
     <div class="absolute left-0 p-2 text-xl text-yellow-200" @dblclick="toggleDevMenu">Next:</div>
     <div class="shape m-auto">
       <div class="grid" :class="getNextShape">

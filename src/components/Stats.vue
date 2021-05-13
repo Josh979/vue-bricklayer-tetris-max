@@ -1,5 +1,5 @@
 <template>
-  <div class="stats-wrapper h-full flex justify-center align-middle flex-col relative ml-10">
+  <div class="stats-wrapper h-full flex justify-self-start flex-col relative ml-10">
     <div class="stats-item">
       <div class="title">score</div>
       <div class="value">{{getScore}}</div>
@@ -60,6 +60,8 @@ export default {
       }
       @apply p-2 mb-10;
       background: #777;
+      //background: linear-gradient(to top, black 10%, silver 70%);
+
       .title{
         @apply text-2xl p-1 italic;
         font-family: cursive;
