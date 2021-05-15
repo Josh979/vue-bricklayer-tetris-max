@@ -16,32 +16,40 @@ export default createStore({
     shapes:['I','L','J','T','O','S','Z'],
     shapesPlaced: 0,
     queue:[],
+    completedRowQueue:[],
+    scoreRowQueue:[],
     spaces:[]
   },
   getters: {
     getDevMenu: state => {
-      return  state.dev.menu;
+      return state.dev.menu;
     },
     getDevPointers: state => {
-      return  state.dev.showPointers;
+      return state.dev.showPointers;
     },
     getShapesPlaced: state => {
-      return  state.shapesPlaced;
+      return state.shapesPlaced;
     },
     getScore: state => {
-      return  state.score;
+      return state.score;
     },
     getLevel: state => {
-      return  state.level;
+      return state.level;
     },
     getNextLevelAt: state => {
-      return  state.nextLevelAt;
+      return state.nextLevelAt;
     },
     getSpeed: state => {
-      return  state.speed;
+      return state.speed;
     },
     getEliminatedRows: state => {
-      return  state.rows.eliminated;
+      return state.rows.eliminated;
+    },
+    completedRowQueue: state => {
+      return state.completedRowQueue;
+    },
+    scoreRowQueue: state => {
+      return state.scoreRowQueue;
     },
     getNextShape: state => {
       return state.queue[1];
@@ -56,6 +64,8 @@ export default createStore({
   mutations: {
     resetGame(state){
       state.queue = [];
+      state.completedRowQueue = [];
+      state.scoreRowQueue = [];
       state.speed = 1000;
       state.nextLevelAt = 1500;
       state.level = 1;
@@ -92,7 +102,18 @@ export default createStore({
         state.speed = state.speed - 100;
       }
     },
-
+    addToScoreQueue(state, payload){
+      state.scoreRowQueue.push(payload);
+    },
+    shiftScoreQueue(state){
+      state.scoreRowQueue.shift();
+    },
+    addToCompletedRowQueue(state, payload){
+      state.completedRowQueue.push(payload);
+    },
+    clearCompletedRowQueue(state){
+      state.completedRowQueue = [];
+    },
     //devmode
     toggleDevMenu(state){
       state.dev.menu = !state.dev.menu;
@@ -128,6 +149,18 @@ export default createStore({
     addPoints({commit}, payload){
       commit('addPoints', payload)
     },
+    addToScoreQueue({commit}, payload){
+      commit('addToScoreQueue', payload)
+      setTimeout(() => {
+        commit('shiftScoreQueue')
+      },1000);
+    },
+    addToCompletedRowQueue({commit}, payload){
+      commit('addToCompletedRowQueue', payload)
+    },
+    clearCompletedRowQueue({commit}){
+      commit('clearCompletedRowQueue')
+    },
 
     //devmode
     toggleDevMenu({commit}){
@@ -137,6 +170,5 @@ export default createStore({
       commit('toggleDevPointers')
     }
   },
-  modules: {
-  }
+  modules: {}
 })

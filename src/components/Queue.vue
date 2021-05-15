@@ -1,31 +1,36 @@
 <template>
-  <div class="queue-wrapper flex self-start justify-center relative mr-10">
-    <div class="absolute left-0 p-2 text-xl text-yellow-200" @dblclick="toggleDevMenu">Next:</div>
-    <div class="shape m-auto">
-      <div class="grid" :class="getNextShape">
-        <div class="row flex">
-          <div class="space S"></div>
-          <div class="space I J L Z"></div>
-          <div class="space"></div>
-        </div>
-        <div class="row flex">
-          <div class="space T O Z S"></div>
-          <div class="space I T O L J Z S "></div>
-          <div class="space T"></div>
-        </div>
-        <div class="row flex">
-          <div class="space O J Z"></div>
-          <div class="space I T O L J S"></div>
-          <div class="space L"></div>
-        </div>
-        <div class="row flex">
-          <div class="space"></div>
-          <div class="space I"></div>
-          <div class="space"></div>
+  <div class="mr-10">
+    <div class="queue-border">
+      <div class="queue-wrapper flex self-start justify-center relative ">
+        <div class="absolute left-0 p-2 next-text font-bold uppercase" @dblclick="toggleDevMenu">Next</div>
+        <div class="shape m-auto">
+          <div class="grid" :class="getNextShape">
+            <div class="row flex">
+              <div class="space S"></div>
+              <div class="space I J L Z"></div>
+              <div class="space"></div>
+            </div>
+            <div class="row flex">
+              <div class="space T O Z S"></div>
+              <div class="space I T O L J Z S "></div>
+              <div class="space T"></div>
+            </div>
+            <div class="row flex">
+              <div class="space O J Z"></div>
+              <div class="space I T O L J S"></div>
+              <div class="space L"></div>
+            </div>
+            <div class="row flex">
+              <div class="space"></div>
+              <div class="space I"></div>
+              <div class="space"></div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
   </div>
+
 </template>
 
 <script>
@@ -52,11 +57,29 @@ export default {
 
 <!-- Add "scoped" attribute to limit CSS to this component only -->
 <style scoped lang="scss">
+.next-text{
+  color:whitesmoke;
+}
+.queue-border{
+  @apply p-3;
+  background: #777;
+  border-radius:3px;
+  border:{
+    top: 2px solid #999;
+    left: 2px solid #999;
+  }
+}
 .queue-wrapper {
-  border: solid 2px blue;
+  //border: solid 1px whitesmoke;
   height: 175px;
   width: 175px;
   background: black;
+  border:{
+    radius:3px;
+    right: 2px solid #999;
+    bottom: 2px solid #999;
+  }
+
 
   .shape {
     padding: 10px;

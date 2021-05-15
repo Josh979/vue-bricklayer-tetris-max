@@ -1,6 +1,6 @@
 <template>
-  <div class="stats-wrapper h-full flex justify-self-start flex-col relative ml-10">
-    <div class="stats-item">
+  <div class="stats-wrapper flex justify-self-start flex-col relative ml-10">
+    <div class="stats-item shadow-lg">
       <div class="title">score</div>
       <div class="value">{{getScore}}</div>
     </div>
@@ -63,8 +63,7 @@ export default {
       //background: linear-gradient(to top, black 10%, silver 70%);
 
       .title{
-        @apply text-2xl p-1 italic;
-        font-family: cursive;
+        @apply text-2xl p-1 capitalize italic;
         background: black;
         border:{
           right: 2px solid #999;
@@ -72,9 +71,14 @@ export default {
         }
       }
       .value{
-        @apply mt-3 py-2 text-xl font-bold;
-        background: #aeaeae;
-        color:black;
+        @apply mt-3 py-1 text-2xl font-bold text-right px-2;
+        background: black;
+        border:{
+          right: 2px solid #999;
+          bottom: 2px solid #999;
+        }
+        border-radius: 3px;
+        color:limegreen;
       }
     }
   }

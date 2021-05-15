@@ -1,41 +1,59 @@
 <template>
   <div class="justify-self-start">
-    <div class="flex justify-center align-middle relative">
-     <div v-show="!started" class="align-middle flex absolute justify-center self-center">
-        <button @click="startGame()" class="start-button text-2xl p-4 font-bold uppercase">Start Game</button>
+    <div class="flex justify-center align-middle relative overflow-hidden">
+     <div v-show="!started" class="align-middle flex absolute justify-center self-center z-30 text-xl">
+       <div class="flex flex-col justify-items-end">
+           <div>
+             <div class="text-sm"> Remade vith Vue.js </div>
+             <div class="text-4xl uppercase font-bold">Bricklayer</div>
+             <div class="text-4xl uppercase font-bold mb-10">Tetris Max</div>
+             <div class="startText">Press Enter To Start</div>
+           </div>
+
+<!--           <div class="mt-10">-->
+<!--             <div class="text-xs"> Music By Peter Wagner </div>-->
+<!--             <div class="text-xs"> Original Game By Steve Chamberlin </div>-->
+<!--           </div>-->
+
+        <!--         <div class="text-sm bg-white text-black py-2 my-3 rounded">Settings</div>-->
+        <!--         <div class="text-sm bg-white text-black py-2 my-3 rounded">Controls</div>-->
+       </div>
       </div>
-      <div v-if="spacesInitialized" class="board-wrapper">
-        <div class="absolute top-1/2 text-4xl z-30  py-4 game-over-banner w-full text-center" v-if="!active">
-          Game Over
-          <div class="flex justify-center">
-            <button class="text-sm py-1 rounded-md px-3 border mt-2" @click="restartGame()">Play again</button>
+      <div class="board-border p-3">
+        <div v-if="spacesInitialized" class="board-wrapper" :class="started && !paused && active ? 'cursor-none' : ''">
+          <div class="absolute top-1/2 text-4xl z-30  py-4 game-over-banner w-full text-center" v-if="!active">
+            Game Over
+            <div class="flex justify-center">
+              <button class="text-sm py-1 rounded-md px-3 border mt-2" @click="restartGame()">Play again</button>
+            </div>
           </div>
-        </div>
-        <div class="absolute top-1/2 text-4xl z-30  py-4 game-over-banner w-full text-center" v-if="paused">Paused</div>
+          <div class="absolute top-1/2 text-4xl z-30  py-4 game-over-banner w-full text-center" v-if="paused">Paused</div>
 
-        <div class="flex flex-col">
-          <div v-for="(row, rIndex) in config.rows" class="relative flex" :key="`col${rIndex}`">
+          <div class="flex flex-col">
+            <div v-for="(row, rIndex) in config.rows" class="relative flex" :key="`col${rIndex}`">
+              <div v-if="hasScoreDisplay(rIndex)" class="w-full absolute scoreText z-30"> {{hasScoreDisplay(rIndex) ? hasScoreDisplay(rIndex)[1] : '1000'}}</div>
 
-            <template v-if="rowIsBeingCleared(rIndex) || true">
-                <div class="absolute transition-all bg-transparent w-full z-10 h-full" :class="rowIsBeingCleared(rIndex) ? 'zapwoosh': ''">
-                <div v-if="rowIsBeingCleared(rIndex)">
-                  <svg class="w-full mt-2">
-                    <use href="#zapper"></use>
-                  </svg>
+              <template v-if="rowIsBeingCleared(rIndex)">
+                <div class="absolute transition-all bg-transparent w-full z-10 h-full overflow-hidden" :class="rowIsBeingCleared(rIndex) ? 'zapwoosh': ''">
+                  <div v-if="rowIsBeingCleared(rIndex) || true">
+                    <svg class="w-full mt-2">
+                      <use href="#zapper"></use>
+                    </svg>
+                  </div>
                 </div>
-              </div>
-            </template>
-            <template v-if="rIndex > 1">
-              <div v-for="(col, cIndex) in config.columns" class="space" :class="spaces[rIndex][cIndex].type"
-                   :key="`space${cIndex},${rIndex}`">
-                <template v-if="isOccupiedSpace(rIndex,cIndex)">
-                  <div class="space" :class="spaces[rIndex][cIndex].occupied"></div>
-                </template>
-                <template v-if="isActiveShape(rIndex,cIndex)">
-                  <div class="space" :class="activeShape.type"><span v-if="getDevPointers">{{activeShape.pointers.indexOf(spaces[rIndex][cIndex])}}</span></div>
-                </template>
-              </div>
-            </template>
+              </template>
+              <template v-if="rIndex > 1">
+                <div v-for="(col, cIndex) in config.columns" class="space" :class="spaces[rIndex][cIndex].type"
+                     :key="`space${cIndex},${rIndex}`">
+                  <template v-if="isOccupiedSpace(rIndex,cIndex)">
+                    <div class="space" :class="spaces[rIndex][cIndex].occupied"></div>
+                  </template>
+                  <template v-if="isActiveShape(rIndex,cIndex)">
+                    <div class="space" :class="activeShape.type"><span v-if="getDevPointers">{{activeShape.pointers.indexOf(spaces[rIndex][cIndex])}}</span></div>
+                  </template>
+                </div>
+              </template>
+            </div>
           </div>
         </div>
       </div>
@@ -77,7 +95,6 @@ export default {
       //spaces will be moved to store
       spaces:[],
       activeInterval: null,
-      completedRowQueue: [],
       spacesInitialized: false,
       activeShape: {
         pointers: [], // use this instead of coords
@@ -99,6 +116,8 @@ export default {
       "getNextLevelAt",
       "getSpeed",
       "getQueue",
+      "scoreRowQueue",
+      "completedRowQueue"
     ]),
     highScore(){
       return localStorage.getItem('highscore');
@@ -110,7 +129,12 @@ export default {
       return Math.floor(this.config.columns / 2);
     }
   },
-
+  created() {
+    this.buildSpaces();
+    this.buildShapes();
+    this.loadAudio();
+    window.addEventListener('keydown', this.startGameListener,null);
+  },
   methods:{
     ...mapActions([
       "processQueue",
@@ -120,29 +144,66 @@ export default {
       "increaseLevel",
       "increaseSpeed",
       "increaseShapesPlaced",
-      "resetGame"
+      "resetGame",
+      "addToScoreQueue",
+      "addToCompletedRowQueue",
+      "clearCompletedRowQueue"
+
     ]),
 
     startGame(){
-      this.startMusic();
-      this.started = true;
+        this.startMusic();
+        this.started = true;
+        this.loadQueue();
+        this.loadQueue();
+        this.spawnShape();
+        //remove startgame listener
+        window.removeEventListener('keydown',this.startGameListener);
 
-      this.loadQueue();
-      this.loadQueue();
-      this.spawnShape();
-      window.addEventListener('keydown', this.handleKeydown, null);
+        window.addEventListener('keydown', this.handleKeydown, null);
+    },
+    gameOver() {
+      this.audio.music.stop();
+      this.audio.gameOver.play();
+
+      clearInterval(this.activeInterval);
+      this.updateHighScore();
+      this.activeShape.pointers = [];
+      this.active = false;
+      window.addEventListener('keydown', this.restartGameListener, null);
+
+    },
+    restartGame(){
+      this.resetGame();
+      this.spaces.forEach((row) => {
+        row.forEach((space) => {
+          space.occupied = false;
+        })
+      });
+      this.active = true;
+      window.removeEventListener('keydown',this.restartGameListener);
+      this.startGame();
+    },
+    togglePause(){
+      if (this.active){
+        if (this.activeInterval !== null){
+          clearInterval(this.activeInterval);
+          this.audio.music.pause();
+          this.activeInterval = null;
+        } else {
+          this.audio.music.play();
+          this.setActiveInterval();
+        }
+        this.paused = !this.paused;
+      }
     },
     loadAudio(){
-      const musicSrc = require('@/assets/music/dist/loop-low.mp3');
       // Music
       this.audio.music = new Howl({
-        src: [musicSrc],
+        src: [require('@/assets/music/dist/loop-low.mp3')],
         //autoplay: true,
         loop: true,
         //volume: 0.5,
-        onend: function() {
-          //console.log('Finished!');
-        }
       });
       // this.audio.music = new Audio(require('@/assets/music/loop.aac'));
       // this.audio.music.loop = true;
@@ -153,23 +214,26 @@ export default {
       this.audio.soundFX.softPlacement = new Howl({
         src: [require('@/assets/sounds/dist/clink.mp3')],
       });
+      this.audio.soundFX.maxClear = new Howl({
+        src: [require('@/assets/sounds/max-clear.wav')],
+      });
+      this.audio.soundFX.lineClear = new Howl({
+        src: [require('@/assets/sounds/blast-hit-echo.wav')],
+        volume: 0.9,
+      });
       this.audio.soundFX.hardDrop = new Howl({
         src: [require('@/assets/sounds/wood-hit-hard-trimmed.wav')],
       });
       this.audio.soundFX.levelUp = new Howl({
         src: [require('@/assets/sounds/dist/levelup.mp3')],
-        volume: 0.75,
+        volume: 0.8,
       });
     },
     startMusic(){
       if (this.audio.gameOver !== null){
         this.audio.gameOver.stop();
       }
-
-      if (this.audio.music !== null){
-        this.audio.music.currentTime = 0;
-        this.audio.music.play();
-      }
+      this.audio.music.play();
     },
     move(direction){
       if (!this.paused){
@@ -534,41 +598,6 @@ export default {
         }
       }
     },
-    gameOver() {
-      if (this.audio.music !== null){
-        this.audio.music.stop();
-      }
-      this.audio.gameOver.play();
-
-      // let glassSound = new Audio(require('@/assets/sounds/glass-v-hammer.wav'));
-      // glassSound.play();
-
-      clearInterval(this.activeInterval);
-      this.updateHighScore();
-      this.activeShape.pointers = [];
-      this.active = false;
-    },
-    restartGame(){
-      this.resetGame();
-      this.spaces.forEach((row) => {
-        row.forEach((space) => {
-          space.occupied = false;
-        })
-      });
-      this.active = true;
-      this.startGame();
-    },
-    togglePause(){
-      if (this.activeInterval !== null){
-        clearInterval(this.activeInterval);
-        this.audio.music.pause();
-        this.activeInterval = null;
-      } else {
-        this.audio.music.play();
-        this.setActiveInterval();
-      }
-      this.paused = !this.paused;
-    },
     levelUp(){
       // level 2 at score 2000?
       // level 3 at score 4500?
@@ -584,14 +613,6 @@ export default {
         localStorage.setItem('highscore', this.score);
       }
     },
-    isWithinBounds(x,y){
-      if (x < 1 || x > this.config.columns){
-        return false;
-      } else if (y < 1 || y > this.config.rows){
-        return false;
-      }
-      return true;
-    },
     isOccupiedSpace(x,y){
       return this.spaces[x][y].occupied;
     },
@@ -601,6 +622,9 @@ export default {
     rowIsBeingCleared(rowIndex){
         return (this.completedRowQueue.indexOf(rowIndex) !== -1)
     },
+    hasScoreDisplay(rowIndex){
+      return (this.scoreRowQueue.find(item => item[0] === rowIndex))
+    },
     checkLevel(){
       if (this.getScore >= this.getNextLevelAt){
         this.levelUp();
@@ -608,10 +632,10 @@ export default {
     },
     rowEliminationCheck(){
       //this can probably be optimized by storing a pointer to each row for lookups
-      this.completedRowQueue = [];
+      this.clearCompletedRowQueue();
       for (let i = 0; i < this.spaces.length; ++i){
         if (!this.spaces[i].find((space) => space.occupied === false)){
-          this.completedRowQueue.push(i);
+          this.addToCompletedRowQueue(i);
         }
       }
       if (this.completedRowQueue.length){
@@ -638,14 +662,10 @@ export default {
         }
       })
 
+
       // updated rows stat
       this.increaseEliminatedRows(arr.length)
       if (arr.length){
-        //let clearedSFX = new Audio(require('@/assets/sounds/air-zoom-vacuum-trimmed.wav'));
-        let clearedSFX = new Audio(require('@/assets/sounds/blast-hit-echo.wav'));
-        //let clearedSFX = new Audio(require('@/assets/sounds/electric-woosh.wav'));
-
-        clearedSFX.play();
         // score is 1000 for a 4 row clear
         // score is 600 for a 3 row clear
         // score is 300 for a 2 row clear
@@ -654,23 +674,48 @@ export default {
         switch(arr.length){
           case 1:
             rowEliminationPoints = 100;
+            this.audio.soundFX.lineClear.play();
             break;
           case 2:
             rowEliminationPoints = 300;
+            this.audio.soundFX.lineClear.play();
+            setTimeout(() => {
+              this.audio.soundFX.lineClear.play();
+            },25)
             break;
           case 3:
             rowEliminationPoints = 600;
+            this.audio.soundFX.lineClear.play();
+            setTimeout(() => {
+              this.audio.soundFX.lineClear.play();
+            },25)
+            setTimeout(() => {
+              this.audio.soundFX.lineClear.play();
+            },50)
             break;
           case 4:
             rowEliminationPoints = 1000;
+            this.audio.soundFX.lineClear.play();
+            this.audio.soundFX.maxClear.play();
+            setTimeout(() => {
+              this.audio.soundFX.lineClear.play();
+            },25)
+            setTimeout(() => {
+              this.audio.soundFX.lineClear.play();
+            },50)
+            setTimeout(() => {
+              this.audio.soundFX.lineClear.play();
+            },75)
             break;
           default:
             rowEliminationPoints = 0;
             break;
         }
+        this.addToScoreQueue([Math.min(...arr),rowEliminationPoints]);
+
         this.addPoints(rowEliminationPoints);
         setTimeout(() => {
-          this.completedRowQueue = [];
+          this.clearCompletedRowQueue();
         },200)
 
       }
@@ -757,9 +802,6 @@ export default {
       this.spaces = spacesArray;
       this.spacesInitialized = true;
     },
-    createRow(){
-
-    },
     createSpaceNode(left = null, right = null, up = null, down = null){
       const space = {
         type: null,
@@ -771,6 +813,18 @@ export default {
     },
     setSpaceType(x,y,type = null){
       this.spaces[x][y].type = type;
+    },
+    startGameListener(e){
+      if (!this.started){
+        if (e.code === 'Enter') {
+          this.startGame();
+        }
+      }
+    },
+    restartGameListener(e){
+      if (e.code === 'Enter') {
+        this.restartGame();
+      }
     },
     handleKeydown(e) {
       switch (e.keyCode) {
@@ -798,20 +852,42 @@ export default {
       }
     }
   },
-  created() {
-    this.buildSpaces();
-    this.buildShapes();
-    this.loadAudio();
-  }
 }
 </script>
 
 <style scoped lang="scss">
+.cursor-none{
+  cursor:none;
+}
+.board-border{
+  border-radius: 3px;
+  border:{
+    top: 2px solid #999;
+    left: 2px solid #999;
+  }
+  background: #777;
+}
 .board-wrapper{
-  border: 2px solid blue;
+  border: 1px solid #555;
   background: black;
+  position:relative;
+  border:{
+    right: 2px solid #999;
+    bottom: 2px solid #999;
+  }
+
   .game-over-banner{
-    background: blue;
+    @apply mx-auto;
+    max-width:100%;
+    overflow: hidden;
+    button{
+      &:hover{
+        background:white;
+        color:blue;
+      }
+    }
+    background: linear-gradient(300deg, blue 20%,lime 100%);
+    //background: blue;
   }
 }
 .space{
@@ -858,11 +934,14 @@ export default {
   &.L{
     //background-color: cyan;
     background: linear-gradient(to top left, darkcyan 0%, cyan 75%);
+    //background: linear-gradient(to top left, #a12600 0%, #ff6b1a 75%);
 
   }
   &.S{
     //background-color: yellow;
     background: linear-gradient(to top left, darken(yellow, 15) 0%, yellow 75%);
+    //background: linear-gradient(to top left, darken(hotpink, 25) 0%, hotpink 75%);
+
   }
   &.Z{
     background: linear-gradient(to top left, grey 0%, white 75%);
@@ -874,23 +953,45 @@ export default {
     background: linear-gradient(to top left, indigo 0%, darkmagenta 75%);
   }
 }
-.start-button{
-  z-index: 100;
-  padding:.5rem 1rem;
-  margin: 1rem;
-  border:1px solid blue;
-  transition: 100ms all;
-  &:hover,&:focus{
-    background-color: blue;
-    color:black;
-  }
-}
 .zapwoosh{
  background: linear-gradient(to top, transparent 25%, #ffffff75 50%, transparent 75%), linear-gradient(to top, transparent 25%, #ffffff75 50%, transparent 75%);
   transform: scaleX(0);
   animation: zapTransition 50ms linear forwards;
 }
+.scoreText{
+  transform: translateY(0%);
+  @apply text-xl text-right pr-3;
+  animation: scoreTextAnimation 1s linear forwards;
+}
 
+.startText{
+  animation: startTextScroll 2s alternate infinite;
+}
+
+@keyframes startTextScroll {
+  0%{
+    opacity:0
+  }
+  100%{
+    opacity:1
+  }
+
+}
+
+@keyframes scoreTextAnimation {
+  0%{
+    transform: translateY(0%);
+    opacity:0;
+  }
+  20%{
+    opacity:1;
+  }
+  100%{
+    transform: translateY(-500%);
+    opacity:0;
+  }
+
+}
 @keyframes zapTransition {
   0%{
     transform: scaleX(0);

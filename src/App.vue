@@ -1,6 +1,6 @@
 <template>
-  <div class="z-10 justify-items-center py-10 w-full" :class="`level-${getLevel < 10 ? getLevel : '9'}`">
-    <div class="flex justify-center w-full h-full items-start">
+  <div class="z-10 justify-items-center align-middle flex-grow py-10 w-full" :class="`level-${getLevel < 10 ? getLevel : '9'}`">
+    <div class="flex justify-center w-full items-start">
       <Queue />
       <Board />
       <Stats />
@@ -48,17 +48,17 @@ body{
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #fff;
-  height: 100%;
+  min-height: 100%;
   display:flex;
   justify-content: center;
 
   div.level{
     &-1{
-      background-color:cyan;
+      background-color:gray;
       background-image: url("/img/patterns/diagmonds.png");
     }
     &-2{
-      background-color:olivedrab;
+      background-color:cyan;
       background-image: url("/img/patterns/black-felt.png");
     }
     &-3{
