@@ -1,10 +1,13 @@
 <template>
-  <div class="justify-items-center py-10 w-full" :class="`level-${getLevel < 10 ? getLevel : '9'}`">
+  <div class="z-10 justify-items-center py-10 w-full" :class="`level-${getLevel < 10 ? getLevel : '9'}`">
     <div class="flex justify-center w-full h-full items-start">
       <Queue />
       <Board />
       <Stats />
     </div>
+  </div>
+  <div class="z-0 absolute">
+    <Beam/>
   </div>
 </template>
 
@@ -12,12 +15,13 @@
 import Queue from './components/Queue.vue'
 import Board from './components/Board.vue'
 import Stats from './components/Stats.vue'
+import Beam from './components/Beam.vue'
 import {mapGetters} from 'vuex';
 
 export default {
   name: 'App',
   components: {
-    Board, Queue, Stats
+    Board, Queue, Stats, Beam
   },
   computed:{
     ...mapGetters([

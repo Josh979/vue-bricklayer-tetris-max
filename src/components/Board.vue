@@ -1,10 +1,7 @@
 <template>
-  <div class="hidden">
-    <Beam/>
-  </div>
   <div class="justify-self-start">
     <div class="flex justify-center align-middle relative">
-      <div v-show="!started" class="align-middle flex absolute justify-center self-center">
+     <div v-show="!started" class="align-middle flex absolute justify-center self-center">
         <button @click="startGame()" class="start-button text-2xl p-4 font-bold uppercase">Start Game</button>
       </div>
       <div v-if="spacesInitialized" class="board-wrapper">
@@ -45,22 +42,16 @@
 
     </div>
   </div>
-
 </template>
 
 <script>
 import {Howl} from 'howler';
-
-import Beam from "./Beam.vue";
 
 import {mapGetters, mapActions} from 'vuex';
 
 export default {
   name: 'Board',
   props: {},
-  components:{
-    Beam
-  },
   data() {
     return {
       config:{
@@ -896,7 +887,6 @@ export default {
   }
 }
 .zapwoosh{
-
  background: linear-gradient(to top, transparent 25%, #ffffff75 50%, transparent 75%), linear-gradient(to top, transparent 25%, #ffffff75 50%, transparent 75%);
   transform: scaleX(0);
   animation: zapTransition 50ms linear forwards;
