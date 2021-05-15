@@ -1,4 +1,7 @@
 <template>
+  <div class="hidden">
+    <Beam/>
+  </div>
   <div class="justify-self-start">
     <div class="flex justify-center align-middle relative">
       <div v-show="!started" class="align-middle flex absolute justify-center self-center">
@@ -8,15 +11,22 @@
         <div class="absolute top-1/2 text-4xl z-30  py-4 game-over-banner w-full text-center" v-if="!active">
           Game Over
           <div class="flex justify-center">
-            <button class="text-sm py-1 rounded-md px-3 border mt-2" @click="restartGame()">Play again?</button>
+            <button class="text-sm py-1 rounded-md px-3 border mt-2" @click="restartGame()">Play again</button>
           </div>
         </div>
-        <div class="absolute top-1/2 text-4xl z-10  py-4 game-over-banner w-full text-center" v-if="paused">Paused</div>
+        <div class="absolute top-1/2 text-4xl z-30  py-4 game-over-banner w-full text-center" v-if="paused">Paused</div>
 
         <div class="flex flex-col">
           <div v-for="(row, rIndex) in config.rows" class="relative flex" :key="`col${rIndex}`">
+
             <template v-if="rowIsBeingCleared(rIndex) || true">
-              <div class="absolute transition-all bg-transparent w-full z-10 h-full" :class="rowIsBeingCleared(rIndex) ? 'bg-yellow-400': ''"></div>
+                <div class="absolute transition-all bg-transparent w-full z-10 h-full" :class="rowIsBeingCleared(rIndex) ? 'zapwoosh': ''">
+                <div v-if="rowIsBeingCleared(rIndex)">
+                  <svg class="w-full mt-2">
+                    <use href="#zapper"></use>
+                  </svg>
+                </div>
+              </div>
             </template>
             <template v-if="rIndex > 1">
               <div v-for="(col, cIndex) in config.columns" class="space" :class="spaces[rIndex][cIndex].type"
@@ -39,11 +49,18 @@
 </template>
 
 <script>
+import {Howl} from 'howler';
+
+import Beam from "./Beam.vue";
+
 import {mapGetters, mapActions} from 'vuex';
 
 export default {
   name: 'Board',
   props: {},
+  components:{
+    Beam
+  },
   data() {
     return {
       config:{
@@ -60,14 +77,17 @@ export default {
       audio:{
         music: null,
         gameOver: null,
-        soundFX:{}
+        soundFX:{
+          softPlacement:null,
+          hardDrop: null,
+          levelUp: null,
+        }
       },
       //spaces will be moved to store
       spaces:[],
       activeInterval: null,
       completedRowQueue: [],
       spacesInitialized: false,
-      nextLevel: 2000,
       activeShape: {
         pointers: [], // use this instead of coords
         type: null,
@@ -85,6 +105,7 @@ export default {
       "getDevPointers",
       "getNextShape",
       "getScore",
+      "getNextLevelAt",
       "getSpeed",
       "getQueue",
     ]),
@@ -121,15 +142,38 @@ export default {
       window.addEventListener('keydown', this.handleKeydown, null);
     },
     loadAudio(){
+      const musicSrc = require('@/assets/music/dist/loop-low.mp3');
+      console.log(musicSrc)
       // Music
-      this.audio.music = new Audio(require('@/assets/music/loop.aac'));
-      this.audio.music.loop = true;
-      this.audio.gameOver = new Audio(require('@/assets/music/game-over.aac'));
+      this.audio.music = new Howl({
+        src: [musicSrc],
+        //autoplay: true,
+        loop: true,
+        //volume: 0.5,
+        onend: function() {
+          console.log('Finished!');
+        }
+      });
+      // this.audio.music = new Audio(require('@/assets/music/loop.aac'));
+      // this.audio.music.loop = true;
+      this.audio.gameOver = new Howl({
+        src: [require('@/assets/sounds/game-over.wav')],
+      });
       // Sound FXs
+      this.audio.soundFX.softPlacement = new Howl({
+        src: [require('@/assets/sounds/dist/clink.mp3')],
+      });
+      this.audio.soundFX.hardDrop = new Howl({
+        src: [require('@/assets/sounds/wood-hit-hard-trimmed.wav')],
+      });
+      this.audio.soundFX.levelUp = new Howl({
+        src: [require('@/assets/sounds/dist/levelup.mp3')],
+        volume: 0.75,
+      });
     },
     startMusic(){
       if (this.audio.gameOver !== null){
-        this.audio.gameOver.pause();
+        this.audio.gameOver.stop();
       }
 
       if (this.audio.music !== null){
@@ -467,7 +511,6 @@ export default {
         if (this.activeInterval){
           clearInterval(this.activeInterval);
         }
-        let placedSound = new Audio(require('@/assets/sounds/wood-hit-hard-trimmed.wav'));
         //hard drop score appears to be 1 point for every row passed between the lowest space of the shape and where it's lowest space comes to rest.
         let i = 0;
         while(i < 20){
@@ -476,7 +519,13 @@ export default {
           }
           ++i;
         }
-        placedSound.play();
+
+        if (i > 0){
+          this.audio.soundFX.hardDrop.play();
+        } else {
+          this.audio.soundFX.softPlacement.play();
+        }
+
         this.addPoints(i);
         this.increaseShapesPlaced();
 
@@ -497,14 +546,12 @@ export default {
     },
     gameOver() {
       if (this.audio.music !== null){
-        this.audio.music.pause();
-        this.audio.music.currentTime = 0;
+        this.audio.music.stop();
       }
-      this.audio.gameOver.currentTime = 0;
       this.audio.gameOver.play();
 
-      let glassSound = new Audio(require('@/assets/sounds/glass-v-hammer.wav'));
-      glassSound.play();
+      // let glassSound = new Audio(require('@/assets/sounds/glass-v-hammer.wav'));
+      // glassSound.play();
 
       clearInterval(this.activeInterval);
       this.updateHighScore();
@@ -540,8 +587,7 @@ export default {
       // level 6 at 9500?
       this.increaseSpeed();
       this.increaseLevel();
-      // const audio = new Audio(require('@/assets/sounds/levelup.mp3'));
-      // audio.play();
+      this.audio.soundFX.levelUp.play();
     },
     updateHighScore(){
       if (localStorage.getItem('highscore') < this.score){
@@ -566,9 +612,8 @@ export default {
         return (this.completedRowQueue.indexOf(rowIndex) !== -1)
     },
     checkLevel(){
-      if (this.getScore >= this.nextLevel){
+      if (this.getScore >= this.getNextLevelAt){
         this.levelUp();
-        this.nextLevel += 2000;
       }
     },
     rowEliminationCheck(){
@@ -586,7 +631,6 @@ export default {
     },
     // pass array of indexes of rows to clear
     eliminateRows(arr){
-
       // clear rows
       arr.forEach((row) => {
         this.spaces[row].forEach((space) => {
@@ -607,7 +651,10 @@ export default {
       // updated rows stat
       this.increaseEliminatedRows(arr.length)
       if (arr.length){
-        let clearedSFX = new Audio(require('@/assets/sounds/air-zoom-vacuum-trimmed.wav'));
+        //let clearedSFX = new Audio(require('@/assets/sounds/air-zoom-vacuum-trimmed.wav'));
+        let clearedSFX = new Audio(require('@/assets/sounds/blast-hit-echo.wav'));
+        //let clearedSFX = new Audio(require('@/assets/sounds/electric-woosh.wav'));
+
         clearedSFX.play();
         // score is 1000 for a 4 row clear
         // score is 600 for a 3 row clear
@@ -634,7 +681,7 @@ export default {
         this.addPoints(rowEliminationPoints);
         setTimeout(() => {
           this.completedRowQueue = [];
-        },100)
+        },200)
 
       }
 
@@ -847,5 +894,21 @@ export default {
     background-color: blue;
     color:black;
   }
+}
+.zapwoosh{
+
+ background: linear-gradient(to top, transparent 25%, #ffffff75 50%, transparent 75%), linear-gradient(to top, transparent 25%, #ffffff75 50%, transparent 75%);
+  transform: scaleX(0);
+  animation: zapTransition 50ms linear forwards;
+}
+
+@keyframes zapTransition {
+  0%{
+    transform: scaleX(0);
+  }
+  100%{
+    transform: scaleX(1);
+  }
+
 }
 </style>

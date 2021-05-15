@@ -9,6 +9,7 @@ export default createStore({
     score: 0,
     speed: 1000,
     level: 1,
+    nextLevelAt: 1500,
     rows: {
       eliminated: 0
     },
@@ -33,6 +34,9 @@ export default createStore({
     getLevel: state => {
       return  state.level;
     },
+    getNextLevelAt: state => {
+      return  state.nextLevelAt;
+    },
     getSpeed: state => {
       return  state.speed;
     },
@@ -53,6 +57,7 @@ export default createStore({
     resetGame(state){
       state.queue = [];
       state.speed = 1000;
+      state.nextLevelAt = 1500;
       state.level = 1;
       state.score = 0;
       state.shapesPlaced = 0;
@@ -76,6 +81,8 @@ export default createStore({
     },
     increaseLevel(state){
       ++state.level;
+      //todo this needs to change between 1500 and 2000. review original game behavior
+      state.nextLevelAt += 2000;
     },
     increaseShapesPlaced(state){
       ++state.shapesPlaced;
