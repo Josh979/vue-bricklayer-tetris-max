@@ -134,7 +134,6 @@ export default {
     },
     loadAudio(){
       const musicSrc = require('@/assets/music/dist/loop-low.mp3');
-      console.log(musicSrc)
       // Music
       this.audio.music = new Howl({
         src: [musicSrc],
@@ -142,7 +141,7 @@ export default {
         loop: true,
         //volume: 0.5,
         onend: function() {
-          console.log('Finished!');
+          //console.log('Finished!');
         }
       });
       // this.audio.music = new Audio(require('@/assets/music/loop.aac'));
