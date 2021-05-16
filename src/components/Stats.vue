@@ -13,7 +13,8 @@
       <div class="value">{{getEliminatedRows}}</div>
     </div>
     <div class=" p-2" v-if="getDevMenu">
-      <button class="px-3 py-2 bg-black text-sm" @click="toggleDevPointers">Toggle Pointers</button>
+      <button class="px-3 mb-2 py-2 bg-black text-sm rounded" @click="toggleDevPointers">Toggle Pointers</button>
+      <button class="px-3 mb-2 py-2 bg-black text-sm rounded" @click="toggleAltTheme">Switch Theme</button>
       <div class="my-2">Speed: {{getSpeed}}ms</div>
       <div class="my-2">Shapes Placed: {{getShapesPlaced}}</div>
     </div>
@@ -39,7 +40,8 @@ export default {
   },
   methods:{
     ...mapActions([
-      "toggleDevPointers"
+      "toggleDevPointers",
+      "toggleAltTheme"
     ])
   }
 }

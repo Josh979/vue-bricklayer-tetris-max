@@ -34,13 +34,8 @@ export default {
 
 <style lang="scss">
 
-html{
-  height:100%;
-
-
-}
-body{
-  height:100%;
+html,body {
+  height: 100%;
 }
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
@@ -62,7 +57,7 @@ body{
       background-image: url("/img/patterns/black-felt.png");
     }
     &-3{
-      background-color:black;
+      background-color:limegreen;
       background-image: url("/img/patterns/escheresque-dark.png");
     }
     &-4{

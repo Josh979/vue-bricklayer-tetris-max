@@ -13,16 +13,15 @@
 //todo clean up this component
 export default {
   name: "Beam",
-  props:{
-    rowId:{
-      required:true,
-      type: String
-    }
-  },
+  // props:{
+  //   rowId:{
+  //     required:true,
+  //     type: String
+  //   }
+  // },
   methods:{
   },
   mounted(){
-    console.log(this.$props)
     let opts = {
       lineWidth: 4,
       numberOfPoints: 35,

@@ -46,10 +46,10 @@
                 <div v-for="(col, cIndex) in config.columns" class="space" :class="spaces[rIndex][cIndex].type"
                      :key="`space${cIndex},${rIndex}`">
                   <template v-if="isOccupiedSpace(rIndex,cIndex)">
-                    <div class="space" :class="spaces[rIndex][cIndex].occupied"></div>
+                    <div class="space" :class="`${spaces[rIndex][cIndex].occupied} ${altTheme ? 'alt-theme' : ''}`"></div>
                   </template>
                   <template v-if="isActiveShape(rIndex,cIndex)">
-                    <div class="space" :class="activeShape.type"><span v-if="getDevPointers">{{activeShape.pointers.indexOf(spaces[rIndex][cIndex])}}</span></div>
+                    <div class="space" :class="`${activeShape.type} ${altTheme ? 'alt-theme' : ''}`"><span v-if="getDevPointers">{{activeShape.pointers.indexOf(spaces[rIndex][cIndex])}}</span></div>
                   </template>
                 </div>
               </template>
@@ -117,7 +117,8 @@ export default {
       "getSpeed",
       "getQueue",
       "scoreRowQueue",
-      "completedRowQueue"
+      "completedRowQueue",
+      "altTheme"
     ]),
     highScore(){
       return localStorage.getItem('highscore');
@@ -899,6 +900,14 @@ export default {
   justify-content: center;
   align-content: center;
   align-items: center;
+  &.alt-theme{
+    &.L{
+      background: linear-gradient(to top left, #a12600 0%, #ff6b1a 75%);
+    }
+    &.S{
+      background: linear-gradient(to top left, darken(hotpink, 25) 0%, hotpink 75%);
+    }
+  }
   &.sphere{
     &.I,&.T,&.Z,&.S,&.L,&.J,&.O {
       border-radius: 50px;

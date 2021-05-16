@@ -6,6 +6,7 @@ export default createStore({
       menu: false,
       showPointers: false,
     },
+    altTheme: false,
     score: 0,
     speed: 1000,
     level: 1,
@@ -59,6 +60,9 @@ export default createStore({
     },
     getQueue: state => {
       return state.queue;
+    },
+    altTheme: state => {
+      return state.altTheme;
     }
   },
   mutations: {
@@ -114,6 +118,11 @@ export default createStore({
     clearCompletedRowQueue(state){
       state.completedRowQueue = [];
     },
+    toggleAltTheme(state){
+      state.altTheme = !state.altTheme;
+    },
+
+
     //devmode
     toggleDevMenu(state){
       state.dev.menu = !state.dev.menu;
@@ -160,6 +169,9 @@ export default createStore({
     },
     clearCompletedRowQueue({commit}){
       commit('clearCompletedRowQueue')
+    },
+    toggleAltTheme({commit}){
+      commit('toggleAltTheme')
     },
 
     //devmode

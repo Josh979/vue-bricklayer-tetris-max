@@ -4,7 +4,7 @@
       <div class="queue-wrapper flex self-start justify-center relative ">
         <div class="absolute left-0 p-2 next-text font-bold uppercase" @dblclick="toggleDevMenu">Next</div>
         <div class="shape m-auto">
-          <div class="grid" :class="getNextShape">
+          <div class="grid" :class="`${getNextShape} ${altTheme ? 'alt-theme' : ''}`">
             <div class="row flex">
               <div class="space S"></div>
               <div class="space I J L Z"></div>
@@ -45,6 +45,7 @@ export default {
   computed: {
     ...mapGetters([
       "getNextShape",
+      "altTheme"
     ])
   },
   methods:{
@@ -79,7 +80,6 @@ export default {
     right: 2px solid #999;
     bottom: 2px solid #999;
   }
-
 
   .shape {
     padding: 10px;
@@ -134,6 +134,12 @@ export default {
         //background-color: cyan;
         background: linear-gradient(to top left, darkcyan 0%, cyan 75%);
       }
+
+      &.alt-theme{
+        .row .space.L {
+          background: linear-gradient(to top left, #a12600 0%, #ff6b1a 75%);
+        }
+      }
     }
 
     .grid.S {
@@ -146,6 +152,12 @@ export default {
         //background-color: yellow;
         background: linear-gradient(to top left, darken(yellow, 15) 0%, yellow 75%);
       }
+      &.alt-theme{
+        .row .space.S {
+          background: linear-gradient(to top left, darken(hotpink, 25) 0%, hotpink 75%);
+        }
+      }
+
     }
 
     .grid.Z {
