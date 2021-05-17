@@ -104,6 +104,8 @@ export default createStore({
     increaseSpeed(state){
       if (state.speed > 200){
         state.speed = state.speed - 100;
+      } else if (state.speed > 100){
+        state.speed = state.speed - 50;
       }
     },
     addToScoreQueue(state, payload){

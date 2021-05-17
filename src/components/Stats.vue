@@ -12,7 +12,8 @@
       <div class="title">rows</div>
       <div class="value">{{getEliminatedRows}}</div>
     </div>
-    <div class=" p-2" v-if="getDevMenu">
+    <div class="dev-menu" v-if="getDevMenu">
+      <div class="font-bold mb-1">Dev Menu</div>
       <button class="px-3 mb-2 py-2 bg-black text-sm rounded" @click="toggleDevPointers">Toggle Pointers</button>
       <button class="px-3 mb-2 py-2 bg-black text-sm rounded" @click="toggleAltTheme">Switch Theme</button>
       <div class="my-2">Speed: {{getSpeed}}ms</div>
@@ -83,5 +84,10 @@ export default {
         color:limegreen;
       }
     }
+  }
+  .dev-menu{
+    background:#00000025;
+    border-radius: 10px;
+    @apply p-2 text-xs;
   }
 </style>
