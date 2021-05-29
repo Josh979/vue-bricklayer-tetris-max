@@ -1,31 +1,22 @@
 # vue-bricklayer
+[![Netlify Status](https://api.netlify.com/api/v1/badges/6d5abb15-f65e-4f41-b103-158b0a08d6f3/deploy-status)](https://app.netlify.com/sites/bricklayer/deploys)
 
-This is my take on remaking Bricklayer/Tetris Maxx which was released in 1994.  This was one of my favorite Mac OS games to play as a kid, and I decided it would be a fun project to remake using Vue 3. It's still in the initial stages, but stay tuned for the playable version.
+This is my take on remaking the 1994 game "Bricklayer" (also released under the name Tetris Max).  This was one of my favorite Mac OS games to play as a kid, and I figured it would be a fun project to remake using Vue 3. The project is not yet complete but is now playable.
 
-### Main Task List:
-- [x] Create game dimensions and grid system (10x20)
-- [ ] Create Responsive UI/Layout
-- [x] Create game shapes 
-- [x] Create next shape queue system
-- [ ] Create game clock system
-  - [ ] Shape taken from queue and spawned
-  - [ ] New Shape added to queue
-  - [ ] Shape movement
-  - [ ] Shape released
-  - [ ] Score update check
-  - [ ] Row elimination check
-  - [ ] Score update check
-  - [ ] Grid overflow check
-  - [ ] Repeat
-- [ ] Create controls logic
-  - [x] Move Left
-  - [x] Move Right
-  - [x] Move Down 
-  - [ ] Hard Drop (space)
-- [x] Create shape rotation logic
-- [ ] Create row elimination logic
-- [ ] Create leveling logic
-- [ ] Soundtrack & permissions
+### Controls:
+- Move Active Shape: <kbd>🠈</kbd><kbd>🠋</kbd><kbd>🠊</kbd>
+- Hard Drop: <kbd>Space</kbd>
+- Rotate Active Shape: 
+  - Clockwise:<kbd>R</kbd>
+  - Counter Clockwise: <kbd>E</kbd>
+- Toggle Pause: <kbd>P</kbd>
+
+### Todo List:
+- Create settings menu with customizable options.
+- Speed/Leveling Tweaks to better match original game
+- Add User Defined controls
+- Add local High Score tracking
+- Secure soundtrack permissions
 
 ## Project setup
 ```
@@ -42,15 +33,6 @@ npm run serve
 npm run build
 ```
 
-### Run your unit tests
-```
-npm run test:unit
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+### Credits:
+- Original Game Created By Steve Chamberlin
+- Music By Peter Robert Wagner 

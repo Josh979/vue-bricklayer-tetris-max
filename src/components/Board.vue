@@ -43,13 +43,13 @@
                 </div>
               </template>
               <template v-if="rIndex > 1">
-                <div v-for="(col, cIndex) in config.columns" class="space" :class="spaces[rIndex][cIndex].type"
+                <div v-for="(col, cIndex) in config.columns" class="space" :class="`${spaces[rIndex][cIndex].type ?? '' }`"
                      :key="`space${cIndex},${rIndex}`">
                   <template v-if="isOccupiedSpace(rIndex,cIndex)">
-                    <div class="space" :class="`${spaces[rIndex][cIndex].occupied} ${altTheme ? 'alt-theme' : ''}`"></div>
+                    <div class="space" :class="`${spaces[rIndex][cIndex].occupied} ${altTheme ? 'alt-theme' : ''} ${paused ? 'paused' : ''}`"></div>
                   </template>
                   <template v-if="isActiveShape(rIndex,cIndex)">
-                    <div class="space" :class="`${activeShape.type} ${altTheme ? 'alt-theme' : ''}`"><span v-if="getDevPointers">{{activeShape.pointers.indexOf(spaces[rIndex][cIndex])}}</span></div>
+                    <div class="space" :class="`${activeShape.type} ${altTheme ? 'alt-theme' : ''} ${paused ? 'paused' : ''}`"><span v-if="getDevPointers">{{activeShape.pointers.indexOf(spaces[rIndex][cIndex])}}</span></div>
                   </template>
                 </div>
               </template>
@@ -1069,6 +1069,11 @@ export default {
   }
 }
 .space{
+  &.paused{
+    opacity:0.25;
+    filter: grayscale(1);
+    transition: 1500ms all;
+  }
   position:relative;
   width: 32px;
   height: 32px;
@@ -1100,7 +1105,7 @@ export default {
     }
   }
   &.I{
-    background: linear-gradient(to top left, darkblue 0%, blue 75%);
+    background: linear-gradient(to top left, #030395 0%, #063aff 75%);
     //border:{
     //  top: 2px solid transparentize(lighten(blue,25),0.1);
     //  left: 2px solid transparentize(lighten(blue,25),0.1);

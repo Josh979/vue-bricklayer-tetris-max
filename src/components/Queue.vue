@@ -89,7 +89,7 @@ export default {
     .grid.I {
       .row > .space.I {
         //background-color: blue;
-        background: linear-gradient(to top left, darkblue 0%, blue 75%);
+        background: linear-gradient(to top left, #030395 0%, #063aff 75%);
       }
     }
 
