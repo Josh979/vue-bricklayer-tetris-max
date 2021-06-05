@@ -137,7 +137,7 @@ export default {
 
       &.alt-theme{
         .row .space.L {
-          background: linear-gradient(to top left, #a12600 0%, #ff6b1a 75%);
+          background: linear-gradient(to top left, #ac380f 0%, #ff761a 75%);
         }
       }
     }

@@ -1,7 +1,9 @@
 <template>
   <div class="z-10 justify-items-center align-middle flex-grow py-10 w-full" :class="`level-${getLevel < 10 ? getLevel : '9'}`">
     <div class="flex justify-center w-full items-start">
-      <Queue />
+      <div>
+        <Queue />
+      </div>
       <Board />
       <Stats />
     </div>

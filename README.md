@@ -7,15 +7,13 @@ This is my take on remaking the 1994 game "Bricklayer" (also released under the 
 - Move Active Shape: <kbd>🠈</kbd><kbd>🠋</kbd><kbd>🠊</kbd>
 - Hard Drop: <kbd>Space</kbd>
 - Rotate Active Shape: 
-  - Clockwise:<kbd>R</kbd>
+  - Clockwise:<kbd>R</kbd>p
   - Counter Clockwise: <kbd>E</kbd>
 - Toggle Pause: <kbd>P</kbd>
 
 ### Todo List:
 - Create settings menu with customizable options.
-- Speed/Leveling Tweaks to better match original game
 - Add User Defined controls
-- Add local High Score tracking
 - Secure soundtrack permissions
 
 ## Project setup

@@ -5,9 +5,12 @@
        <div class="flex flex-col justify-items-end">
            <div>
              <div class="text-sm"> Remade vith Vue.js </div>
-             <div class="text-4xl uppercase font-bold">Bricklayer</div>
+             <div class="text-4xl uppercase font-bold ">Bricklayer</div>
              <div class="text-4xl uppercase font-bold mb-10">Tetris Max</div>
-             <div class="startText">Press Enter To Start</div>
+             <div class="startText mb-10">Press Enter To Start</div>
+             <div v-if="highScore" class="text-sm justify-self-end">
+               <div class="font-bold">Top Score: {{highScore.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",")}}</div>
+             </div>
            </div>
 
 <!--           <div class="mt-10">-->
@@ -110,10 +113,12 @@ export default {
   computed:{
     ...mapGetters([
       "getShape",
+      "getScore",
       "getDevPointers",
       "getNextShape",
       "getScore",
       "getNextLevelAt",
+      "getEliminatedRows",
       "getSpeed",
       "getQueue",
       "scoreRowQueue",
@@ -149,7 +154,6 @@ export default {
       "addToScoreQueue",
       "addToCompletedRowQueue",
       "clearCompletedRowQueue"
-
     ]),
 
     startGame(){
@@ -162,6 +166,11 @@ export default {
         window.removeEventListener('keydown',this.startGameListener);
 
         window.addEventListener('keydown', this.handleKeydown, null);
+    },
+    setHighScore(){
+      if (this.getScore > this.highScore){
+        localStorage.setItem('highscore', this.getScore)
+      }
     },
     gameOver() {
       this.audio.music.stop();
@@ -774,18 +783,13 @@ export default {
       }
     },
     levelUp(){
-      // level 2 at score 2000?
-      // level 3 at score 4500?
-      // level 4 at score 6000?
-      // level 5 between 7000-7900?
-      // level 6 at 9500?
       this.increaseSpeed();
       this.increaseLevel();
       this.audio.soundFX.levelUp.play();
     },
     updateHighScore(){
-      if (localStorage.getItem('highscore') < this.score){
-        localStorage.setItem('highscore', this.score);
+      if (this.highScore < this.getScore){
+        localStorage.setItem('highscore', this.getScore);
       }
     },
     isOccupiedSpace(x,y){
@@ -801,7 +805,7 @@ export default {
       return (this.scoreRowQueue.find(item => item[0] === rowIndex))
     },
     checkLevel(){
-      if (this.getScore >= this.getNextLevelAt){
+      if (this.getEliminatedRows >= this.getNextLevelAt){
         this.levelUp();
       }
     },
@@ -1084,7 +1088,7 @@ export default {
   align-items: center;
   &.alt-theme{
     &.L{
-      background: linear-gradient(to top left, #a12600 0%, #ff6b1a 75%);
+      background: linear-gradient(to top left, #ac380f 0%, #ff761a 75%);
     }
     &.S{
       background: linear-gradient(to top left, darken(hotpink, 25) 0%, hotpink 75%);

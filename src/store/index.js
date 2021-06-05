@@ -6,15 +6,16 @@ export default createStore({
       menu: false,
       showPointers: false,
     },
-    altTheme: false,
+    altTheme: true,
     score: 0,
     speed: 1000,
     level: 1,
-    nextLevelAt: 1500,
+    nextLevelAt: 10,
     rows: {
       eliminated: 0
     },
-    shapes:['I','L','J','T','O','S','Z'],
+    shapes:['I','J','L','O','S','T','Z'],
+    shapesReceived: {I:0,J:0,L:0,O:0,S:0,T:0,Z:0},
     shapesPlaced: 0,
     queue:[],
     completedRowQueue:[],
@@ -30,6 +31,9 @@ export default createStore({
     },
     getShapesPlaced: state => {
       return state.shapesPlaced;
+    },
+    getShapesReceived: state => {
+      return state.shapesReceived;
     },
     getScore: state => {
       return state.score;
@@ -71,11 +75,15 @@ export default createStore({
       state.completedRowQueue = [];
       state.scoreRowQueue = [];
       state.speed = 1000;
-      state.nextLevelAt = 1500;
+      state.nextLevelAt = 10;
       state.level = 1;
       state.score = 0;
       state.shapesPlaced = 0;
       state.rows.eliminated = 0;
+      state.shapesReceived = {};
+      state.shapes.forEach((shape) => {
+         state.shapesReceived[shape] = 0;
+      })
     },
     processQueue(state){
       state.activeShape = state.queue.shift();
@@ -86,6 +94,8 @@ export default createStore({
       const randomIndex = Math.floor(Math.random() * (max - min) + min);
       const newShape = state.shapes[randomIndex];
       state.queue.push(newShape);
+      state.shapesReceived[newShape]++;
+
     },
     increaseEliminatedRows(state, rowsToAdd){
       state.rows.eliminated += rowsToAdd;
@@ -95,8 +105,7 @@ export default createStore({
     },
     increaseLevel(state){
       ++state.level;
-      //todo this needs to change between 1500 and 2000. review original game behavior
-      state.nextLevelAt += 2000;
+      state.nextLevelAt += 10;
     },
     increaseShapesPlaced(state){
       ++state.shapesPlaced;
@@ -104,7 +113,7 @@ export default createStore({
     increaseSpeed(state){
       if (state.speed > 200){
         state.speed = state.speed - 100;
-      } else if (state.speed > 100){
+      } else if (state.speed > 150){
         state.speed = state.speed - 50;
       }
     },

@@ -14,10 +14,29 @@
     </div>
     <div class="dev-menu" v-if="getDevMenu">
       <div class="font-bold mb-1">Dev Menu</div>
-      <button class="px-3 mb-2 py-2 bg-black text-sm rounded" @click="toggleDevPointers">Toggle Pointers</button>
-      <button class="px-3 mb-2 py-2 bg-black text-sm rounded" @click="toggleAltTheme">Switch Theme</button>
-      <div class="my-2">Speed: {{getSpeed}}ms</div>
-      <div class="my-2">Shapes Placed: {{getShapesPlaced}}</div>
+      <div class="flex justify-around">
+        <button class="px-3 mb-2 py-2 bg-black text-xs rounded" @click="toggleDevPointers">Pointers</button>
+        <button class="px-3 mb-2 py-2 bg-black text-xs rounded" @click="toggleAltTheme">Theme</button>
+      </div>
+      <div class="my-2 flex justify-around">
+        <div class="flex flex-col">
+          <div>Speed</div>
+          <div>{{getSpeed}}ms</div>
+        </div>
+        <div class="flex flex-col">
+          <div>Blocks</div>
+          <div>{{getShapesPlaced}}</div>
+        </div>
+      </div>
+      <div class="my-2">
+        <div class="mb-1">Distribution %</div>
+        <div class="flex justify-center w-full">
+          <div class="flex flex-col w-full" v-for="(shapeCount, shapeName) in getShapesReceived" :key="`${shapeName}-received`">
+            <div :class="`${altTheme ? 'alt-theme' : ''} letter letter-${shapeName}`">{{shapeName}}</div>
+            <div class="value">{{percentOfAllShapeDistribution(shapeCount)}}</div>
+          </div>
+        </div>
+      </div>
     </div>
 
   </div>
@@ -34,16 +53,27 @@ export default {
         "getScore",
         "getLevel",
         "getShapesPlaced",
+        "getShapesReceived",
         "getSpeed",
         "getEliminatedRows",
-        "getDevMenu"
-    ])
+        "getDevMenu",
+        "altTheme"
+    ]),
+    shapesLoaded(){
+      return Object.values(this.getShapesReceived).reduce((curr,acc) => curr+acc);
+    }
   },
   methods:{
     ...mapActions([
       "toggleDevPointers",
       "toggleAltTheme"
-    ])
+    ]),
+    percentOfAllShapeDistribution(value){
+      if (this.shapesLoaded){
+        return Math.floor(value / this.shapesLoaded * 100);
+      }
+      return 0;
+    }
   }
 }
 </script>
@@ -86,8 +116,42 @@ export default {
     }
   }
   .dev-menu{
-    background:#00000025;
+    background:#00000040;
     border-radius: 10px;
     @apply p-2 text-xs;
+    .letter{
+      font-weight: bold;
+      font-size: 11px;
+      &-I{
+        color:blue;
+      }
+      &-J{
+        color:red;
+      }
+      &-L{
+        color:cyan;
+        &.alt-theme{
+          color:orange;
+        }
+      }
+      &-O{
+        color:darkmagenta;
+      }
+      &-S{
+        color:yellow;
+        &.alt-theme{
+          color:hotpink;
+        }
+      }
+      &-T{
+        color:limegreen;
+      }
+      &-Z{
+        color:white;
+      }
+    }
+    .value{
+      font-size: 11px;
+    }
   }
 </style>
